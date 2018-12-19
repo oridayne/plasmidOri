@@ -1,0 +1,17 @@
+.row{
+	width: 220px;
+	height: 20px;
+	margin-bottom: 1px;
+	outline: 1px solid black;
+
+}
+
+.rowwrapper{
+	display:flex;
+	flex-direction:column;
+	width: 100px;
+}
+
+.input{
+	text-transform:uppercase;
+}

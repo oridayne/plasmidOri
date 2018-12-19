@@ -1,0 +1,8 @@
+TODOS:
+- better UI for search list 
+- test cases
+- fix submit/edit for neg or postive start and end cases
+- ATG end case handling
+- other stop/start codons
+- double line text
+- amino acid conversion

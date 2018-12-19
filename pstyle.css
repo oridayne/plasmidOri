@@ -1,0 +1,82 @@
+
+/*plasmid settings*/
+:root {
+  --nav-width: 600px;
+}
+#p1 {
+	outline:1px solid #ccc; 
+	width: 500px; 
+	height: 500px;
+}
+#t1 {
+ 	fill:#f0f0f0;
+ 	stroke:#ccc;
+ }
+.sminor {
+ 	stroke:#ccc;
+ }
+.smajor {
+	stroke:#f00;
+}
+.sml { 
+	fill:#999;
+	font-size:10px;
+}
+.smajorin { 
+	stroke:#999;
+}
+.marker { 
+	fill:#fc0;
+	stroke:#fc0 
+}
+.mlabel { 
+	fill:#c00;
+	font-size:10px;
+	font-weight:bold 
+}
+.markerhover{
+  stroke: rgba(255,0,0,0);
+  stroke-width: 2px;
+}
+.markerhover:hover {
+  stroke: #f00;
+  stroke-width: 2px;
+  cursor: move;
+
+}
+.orfhover:hover {
+  stroke: #f00;
+  stroke-width: 2px;
+}
+.markertick{
+	stroke:rgba(255,0,0,0);
+	stroke-width:2px;
+	z-index: 5;
+}
+.markertick:hover{
+	stroke:rgba(255,0,0,1);
+	stroke-width:2px;
+	cursor: crosshair;
+}
+
+.highlight{
+	fill:rgba(0,0,255,.2);
+	stroke:#036;
+}
+
+.highlight:hover{
+	fill:rgba(0,0,255,.2);
+	stroke-width:2px;
+	stroke:rgba(255,0,0,1);
+	cursor: move;
+}
+
+.tickstyle{
+	stroke:rgba(255,0,0,1);
+	stroke-width:2px;
+}
+
+.tickhover;{
+	stroke:rgba(255,0,0,0);
+	stroke-width:2px;
+}

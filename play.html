@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <!-- // <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script> -->
+        <!-- // <script src="https://d3js.org/d3.v3.min.js"></script> -->
+        <!-- // <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js" type="text/javascript"></script>  -->
+        <script src='angular.1.6.9.min.js'></script>
+        <script src='angularplasmid.min.js'></script>
+        <link rel="stylesheet" href="pstyle.css">
+        <link rel="stylesheet" href="ppage.css">
+        <script src="jquery.2.1.3.min.js" type="text/javascript"></script> 
+        <script src="d3.v3.min.js" type="text/javascript"></script>
+        <script src="pscript.js" type="text/javascript"></script>
+        <script src="plasmidGrab.js" type="text/javascript"></script>
+
+    </head>
+    <body>
+
+        
+        <div ng-app="myApp" ng-controller="myCtrl" id="divider" >
+            <div id="display">
+
+                <plasmid id='p1' sequencelength='{{seq.length}}'>
+                    <plasmidtrack   radius="{{myRad}}"  id='t1' transform="translate(100,100)">
+
+                        <!-- ticks -->
+                        <trackscale  id="innerticks" class='smajor' interval='{{interval}}' showlabels='1' labelclass='sml'></trackscale>
+
+                        <!-- user annotations       -->
+                        <trackmarker class="highlight" ng-repeat='n in annotations' start='{{n.start}}' end='{{n.end}}' ng-click="showDNA('Annotated Frame ', n.start, n.end); toggle('annotate'); setAnnotatePoints(n.start, n.end, n.name);"  ></trackmarker>
+                        
+                        <!-- search results -->
+                        <trackmarker   markerclass="markerhover" markerstyle="fill:rgba(128,0,0,0.2)" ng-repeat='n in searchResults' start='{{n.start}}' end='{{n.end}}' vadjust="25"  ng-click="toggle('search');showDNA('Sample Frame ', n.start, n.end); setSearchPoints(n.start, n.end); "  ></trackmarker>
+
+                        <!-- ORFS -->
+                        <trackmarker ng-click="showDNA('Open Reading Frame ', n[0], n[1]+2); toggle('viewer')" ng-repeat='n in orfsdata' markerclass="orfhover"  start="{{n[0]}}" end="{{n[1]}}"  vadjust="-20" wadjust="-23" arrowstartlength="0.8" arrowstartwidth="10" arrowendlength="5" arrowendwidth="3"></trackmarker>
+                        
+                        <!-- drawing arc forward -->
+                        <trackmarker markerclass="markerhover" ng-if="ed!=false && start<end" start="{{start}}" end="{{end}}" ng-click="showDNA('Sample Frame ',start, end); toggle('viewer')" ng-dblclick="reset()" vadjust="25" markerstyle="fill:rgba(0,128,0,0.2)" wadjust=""></trackmarker>
+
+                        <!-- drawing arc backward -->
+                        <trackmarker markerclass="markerhover"  ng-click="showDNA('Sample Frame ',end, start); toggle('viewer')" ng-dblclick="reset()" ng-if="ed!=false && start>end" start="{{end}}" end="{{start}}"  vadjust="25" markerstyle="fill:rgba(0,128,0,0.2)" wadjust=""></trackmarker>
+
+                    </plasmidtrack>
+                </plasmid>
+
+            </div>
+           
+            <div id="editor" >
+                <div id="dna" class="item active" ng-click="toggle('dna')"><p>DNA</p></div>
+                <div id="viewer" class="item" ng-click="toggle('viewer')"><p>Viewer</p></div>
+                <div id="searchAnnotate" class="item" ng-click="toggle('search')"><p>Search</p></div>
+                <div id="content">
+
+                    <!-- content for dna editing -->
+                     <div ng-show="selected=='dna'" id="controlDNA" >
+                        <textarea ng-model="seq" ng-keyup='orfsFunc($event)' id="sequence"></textarea>     
+                    </div>
+
+                    <!-- content for searching -->
+                    <div ng-show="selected=='search'">
+                        <textarea type="text" placeholder="Search.." id="search" ng-model="search"></textarea>
+                        <button ng-click="searchDNA();" id="searchbutton">Go!</button><button ng-click="clear()">Clear</button>
+                        <p data-ng-bind="title"> </p>
+                        <div class="viewSmaller">{{view}}</div> 
+                        <button ng-click="annotate(selectedStart, selectedEnd); resetSearch();" ng-if="selectedStart && selectedEnd">Annotate</button>
+
+                    </div>
+
+                    <!-- content for viewing fragments (highlight) -->
+                    <div ng-show="selected=='viewer'">
+                        <div id="scroll">
+                            <input type="number" class="viewControl" ng-model="start" >
+                            <input type="number" class="viewControl" ng-model="end">
+                        </div>
+                        <p data-ng-bind="title"></p>
+                        <div class="view" ><p data-ng-bind="view"></p></div> 
+                        <button ng-click="annotate(start, end);">Annotate</button>
+                    </div>
+
+                    <!-- content for viewing annotations -->
+                    <div ng-show="selected=='annotate'">
+                        <input id="name" ng-click="editName()" ng-keydown="editKeys($event)" class="editFocus" ng-model="annotateName" readonly>
+
+                        <p> {{annotateStart}}-{{annotateEnd}}</p>
+                        <div id="annotationeditor" class="view" data-ng-bind="view" contentEditable="false"></div> 
+                        <button id="editAnnotation" class="btn" ng-click="editAnnotation()">Edit</button>
+                        <button class="btn" ng-click="submitAnnotation(); orfsFunc();">Submit</button>
+                        <button class="btn" ng-click="removeAnnotation(annotateStart, annotateEnd)">Remove Annotation</button>
+                        <button class="btn" ng-click="removeAnnotation(annotateStart, annotateEnd);deleteAnnotation(annotateStart, annotateEnd); orfsFunc();">Delete Sequence</button>
+                    </div>
+
+                    <!-- content for viewing orfs -->
+<!--                     <div ng-show="selected=='orf'">
+                        <input id="name" ng-click="editName()" ng-keydown="editKeys($event)" class="editFocus" ng-model="annotateName" readonly>
+
+                        <p> {{annotateStart}}-{{annotateEnd}}</p>
+                        <div id="annotationeditor" class="view" data-ng-bind="view" contentEditable="false"></div> 
+                        <button id="editAnnotation" class="btn" ng-click="editAnnotation()">Edit</button>
+                        <button class="btn" ng-click="submitAnnotation(); orfsFunc();">Submit</button>
+                        <button class="btn" ng-click="removeAnnotation(annotateStart, annotateEnd)">Remove Annotation</button>
+                        <button class="btn" ng-click="removeAnnotation(annotateStart, annotateEnd);deleteAnnotation(annotateStart, annotateEnd); orfsFunc();">Delete Sequence</button>
+                    </div>       --> 
+
+                </div>
+
+                <div id="control" class="item">
+                    <!-- control panel for dna editing -->
+                    <div ng-show="selected=='dna'" id="controlDNA" class="panel">
+                        <div class="sideInfo">
+                            
+                            <p>Sequence Length:{{seq.length}}</p>
+                            <p>ORF Minimum Length:<input type="number" id="orf" class="viewControl" ng-keydown="editOrf($event)" value={{minLength}}></p>
+                            <p>tick interval:<input id="interval" class="viewControl" ng-keydown="editInterval($event)" type="number" value={{interval}}></p>
+                        </div>
+                        <button class="btn">Edit</button>
+                        <button class="btn">Submit</button>
+                    </div>
+
+                    
+                </div>
+            </div>
+
+        </div>    
+
+    </body>
+</html>
+
