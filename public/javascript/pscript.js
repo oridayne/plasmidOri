@@ -31,14 +31,10 @@ var app = angular.module('myApp', ['angularplasmid']);
         $scope.annotateEnd = false;
         $scope.annotateName = "default";
         $scope.annotations = [{start:5, end:7, name:"Annotated Frame"}];
-        // $scope.annotations = [];
-
         // plasmid attributes
         $scope.interval = Math.floor(Math.max($scope.seq.length/30, 1));
         $scope.minLength = 0;
         $scope.orfs = findAllORF($scope.seq, $scope.minLength);
-        // $scope.orfs =[[0,10]];
-
 
         $scope.setSearchPoints = function(start,end){$scope.selectedStart=start; $scope.selectedEnd=end;};
         $scope.setAnnotatePoints = function(start,end, name){$scope.annotateStart=start; $scope.annotateEnd=end; $scope.annotateName=name;};
@@ -188,7 +184,6 @@ function submitAnnotation(){
     var newEnd = scope.annotateEnd + diff;
     var newStr = "";
     if(scope.annotateStart<0){
-      console.log(newAnn);
       let start = newAnn.substring(Math.abs(scope.annotateStart));
       let mid = scope.seq.substring(scope.annotateEnd, scope.annotateStart+scope.seq.length);
       let end = newAnn.substring(0, Math.abs(scope.annotateStart));
@@ -271,28 +266,33 @@ function getNewSeqOut(start,end){
   } 
 }
 
+/*
+* Deletes base pairs within start and end index of the sequence
+* @param{int} start - starting index
+* @param{int} end - ending index
+*/
 function deleteAnnotation(start,end){
+
   let scope = angular.element($("#divider")).scope();
   let seq = scope.seq;
   let diff = end-start;
   scope.seq = getNewSeqOut(start,end);
   if(start>=0&&end>=0){
-    diff=end-start;
-  }
-  else if (start<0&&end>=0){
-    diff=end-start-(Math.abs(start));
-  }
-  else if(start>=0&&end<0){
-    diff=start;
-  }
-  else if(start<0&&end<0){
-    start +=seq.length;
-    end +=seq.length;
     diff = end-start;
   }
-  // let diff = end-start;
+  else if (start<0&&end>=0){
+    diff = end-start-(Math.abs(start));
+  }
+  else if(start>=0&&end<0){
+    diff = start;
+  } 
+  else if(start<0&&end<0){
+    start += seq.length;
+    end += seq.length;
+    diff = end-start;
+  }
+  // shift following annotations
   for(x=0;x<scope.annotations.length;x++){
-  // does it come before other annotations?
     if(end<=scope.annotations[x].start){
       scope.annotations[x].start-=diff;
       scope.annotations[x].end-=diff;
@@ -300,6 +300,13 @@ function deleteAnnotation(start,end){
   }
 }
 
+/*
+* Finds all ORFs in the sequence, excludes all ORFS below the threshold length
+* returns a list of all the orfs
+* @param{string} seq - current DNA sequence
+* @param{minLength} - minimum length of the ORF allowed
+* @return[[start,end]]
+*/
 // finds all ORFs, excludes all ORFS below threshold length
 function findAllORF(seq, minLength){
   let results = [];
@@ -307,13 +314,12 @@ function findAllORF(seq, minLength){
   while(seq.indexOf(startCodon, index)!=-1){
     let start = seq.indexOf(startCodon, index);
     let end = seq.indexOf(stopCodon, start);
-    console.log(start, end);
     // no end codon detected, break
     if(end==-1){
       // now check for ahead of the start codon
+      // this is important, since our sequence is circular
       let ahead = seq.substring(0, start);
       let nextEnd = ahead.indexOf(stopCodon,0);
-      console.log(ahead, nextEnd, index);
       // truly there is no stop
       if(nextEnd==-1){
         break;
@@ -337,21 +343,6 @@ function findAllORF(seq, minLength){
   return results;
 }
 
-function checkAhead(){
-
-}
-
-// generating a random sequence
-function randSeq(seqlen){
-  testStr="";
-  pairs = ["A", "T", "G","C"];
-  pairs2=["T","A","C","G"];
-  for(var x=0;x<seqlen;x++){
-    var index = Math.floor(Math.random()*100);
-    testStr+=pairs[index%4];
-    compStr+=pairs2[index%4];
-  }
-}
 
 // begin editing of annotation name
 function editName(){
