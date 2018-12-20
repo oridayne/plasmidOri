@@ -30,13 +30,13 @@
                         <trackmarker class="highlight" ng-repeat='n in annotations' start='{{n.start}}' end='{{n.end}}' ng-click="showDNA('Annotated Frame ', n.start, n.end); toggle('annotate'); setAnnotatePoints(n.start, n.end, n.name);"  ></trackmarker>
                         
                         <!-- search results -->
-                        <trackmarker   markerclass="markerhover" markerstyle="fill:rgba(128,0,0,0.2)" ng-repeat='n in searchResults' start='{{n.start}}' end='{{n.end}}' vadjust="25"  ng-click="toggle('search');showDNA('Sample Frame ', n.start, n.end); setSearchPoints(n.start, n.end); "  ></trackmarker>
+                        <trackmarker   markerclass="markerhover" markerstyle="fill:rgba(128,0,0,0.2)" ng-repeat='n in searchResults' start='{{n.start}}' end='{{n.end}}' vadjust="25"  ng-click="toggle('search');showDNA('Sample Frame ', n.start, n.end); setSearchPoints(n.start, n.end); "></trackmarker>
 
                         <!-- ORFS -->
                         <trackmarker ng-click="showDNA('Open Reading Frame ', n[0], n[1]+2); toggle('viewer')" ng-repeat='n in orfsdata' markerclass="orfhover"  start="{{n[0]}}" end="{{n[1]}}"  vadjust="-20" wadjust="-23" arrowstartlength="0.8" arrowstartwidth="10" arrowendlength="5" arrowendwidth="3"></trackmarker>
                         
                         <!-- drawing arc forward -->
-                        <trackmarker markerclass="markerhover" ng-if="ed!=false && start<end" start="{{start}}" end="{{end}}" ng-click="showDNA('Sample Frame ',start, end); toggle('viewer')" ng-dblclick="reset()" vadjust="25" markerstyle="fill:rgba(0,128,0,0.2)" wadjust=""></trackmarker>
+                        <trackmarker markerclass="markerhover" ng-if="ed!=false && start<end" start="{{start}}" end="{{end}}" ng-click="showDNA('Sample Frame ',start, end); toggle('viewer')" ng-dblclick="reset(); resetView();" vadjust="25" markerstyle="fill:rgba(0,128,0,0.2)" wadjust=""></trackmarker>
 
                         <!-- drawing arc backward -->
                         <trackmarker markerclass="markerhover"  ng-click="showDNA('Sample Frame ',end, start); toggle('viewer')" ng-dblclick="reset()" ng-if="ed!=false && start>end" start="{{end}}" end="{{start}}"  vadjust="25" markerstyle="fill:rgba(0,128,0,0.2)" wadjust=""></trackmarker>
@@ -74,7 +74,7 @@
                             <input type="number" class="viewControl" ng-model="end">
                         </div>
                         <p data-ng-bind="title"></p>
-                        <div class="view" ><p data-ng-bind="view"></p></div> 
+                        <div class="view" ng-click="editSequence($event)" ng-keydown="submitSequence(start,end,$event)" id="sampleeditor" data-ng-bind="view" contenteditable></div> 
                         <button ng-click="annotate(start, end);">Annotate</button>
                     </div>
 
@@ -110,7 +110,7 @@
                         <div class="sideInfo">
                             
                             <p>Sequence Length:{{seq.length}}</p>
-                            <p>ORF Minimum Length:<input type="number" id="orf" class="viewControl" ng-keydown="editOrf($event)" value={{minLength}}></p>
+                            <p>ORF Minimum Length:<input type="number" id="orf" class="viewControl" ng-keydown="editOrfMinLength($event)" value={{minLength}}></p>
                             <p>tick interval:<input id="interval" class="viewControl" ng-keydown="editInterval($event)" type="number" value={{interval}}></p>
                         </div>
                         <button class="btn">Edit</button>

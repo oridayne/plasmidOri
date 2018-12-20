@@ -5,8 +5,8 @@ const startCodon = "ATG";
 const stopCodon = "ATT";
 
 // testStr ="AACTGTATGCGGAAAAGGAGGCCAGTGCATCAGAGAGTCGCAAACAGCTGTGAAGTCGCGTTCTCAAGAATTTGCAGCAGGCTGTGGCCACTTCGCCGGAAAAGGAGGCCAGTGCATCAGAGAGCAAGATCACAGCTGTGAAGTCGCTTCAACTGTATGCGGAAAAGGAGGCCAGTGCATCAGAGAGTCGCAAACAGCTGTGAAGTCGCGTTCTCAAGAATTTGCAGCAGGCTGTGGCCACTTCGCCGGAAAAGGAGGCCAGTGCATCAGAGAGCAAGATCACAGCTGTGAAGTCGCTTCAACTGTATGCGGAAAAGGAGGCCAGTGCATCAGAGAGTCGCAAACAGCTGTGAAGTCGCGTTCTCAAGAATTTGCAGCAGGCTGTGGCCACTTCGCCGGAAAAGGAGGCCAGTGCATCAGAGAGCAAGATCACAGCTGTGAAGTCGCTTCAACTGTATGCGGAAAAGGAGGCCAGTGCATCAGAGAGTCGCAAACAGCTGTGAAGTCGCGTTCTCAAGAATTTGCAGCAGGCTGTGGCCACTTCGCCGGAAAAGGAGGCCAGTGCATCAGAGAGCAAGATCACAGCTGTGAAGTCGCTTCAACTGTATGCGGAAAAGGAGGCCAGTGCATCAGAGAGTCGCAAACAGCTGTGAAGTCGCGTTCTCAAGAATTTGCAGCAGGCTGTGGCCACTTCGCCGGAAAAGGAGGCCAGTGCATCAGAGAGCAAGATCACAGCTGTGAAGTCGCTTCAACTGTATGCGGAAAAGGAGGCCAGTGCATCAGAGAGTCGCAAACAGCTGTGAAGTCGCGTTCTCAAGAATTTGCAGCAGGCTGTGGCCACTTCGCCGGAAAAGGAGGCCAGTGCATCAGAGAGCAAGATCACAGCTGTGAAGTCGCTTCAACTGTATGCGGAAAAGGAGGCCAGTGCATCAGAGAGTCGCAAACAGCTGTGAAGTCGCGTTCTCAAGAATTTGCAGCAGGCTGTGGCCACTTCGCCGGAAAAGGAGGCCAGTGCATCAGAGAGCAAGATCACAGCTGTGAAGTCGCTTCAACTGTATGCGGAAAAGGAGGCCAGTGCATCAGAGAGTCGCAAACAGCTGTGAAGTCGCGTTCTCAAGAATTTGCAGCAGGCTGTGGCCACTTCGCCGGAAAAGGAGGCCAGTGCATCAGAGAGCAAGATCACAGCTGTGAAGTCGCTTCAACTGTATGCGGAAAAGGAGGCCAGTGCATCAGAGAGTCGCAAACAGCTGTGAAGTCGCGTTCTCAAGAATTTGCAGCAGGCTGTGGCCACTTCGCCGGAAAAGGAGGCCAGTGCATCAGAGAGCAAGATCACAGCTGTGAAGTCGCTTCAACTGTATGCGGAAAAGGAGGCCAGTGCATCAGAGAGTCGCAAACAGCTGTGAAGTCGCGTTCTCAAGAATTTGCAGCAGGCTGTGGCCACTTCGCCGGAAAAGGAGGCCAGTGCATCAGAGAGCAAGATCACAGCTGTGAAGTCGCTTCAACTGTATGCGGAAAAGGAGGCCAGTGCATCAGAGAGTCGCAAACAGCTGTGAAGTCGCGTTCTCAAGAATTTGCAGCAGGCTGTGGCCACTTCGCCGGAAAAGGAGGCCAGTGCATCAGAGAGCAAGATCACAGCTGTGAAGTCGCTTCAACTGTATGCGGAAAAGGAGGCCAGTGCATCAGAGAGTCGCAAACAGCTGTGAAGTCGCGTTCTCAAGAATTTGCAGCAGGCTGTGGCCACTTCGCCGGAAAAGGAGGCCAGTGCATCAGAGAGCAAGATCACAGCTGTGAAGTCGCTTC";
-// testStr = "AACTGTATGCGGAAAAGGAGGCCAGTGCATCAGAGAGTCGCAAACAGCTGTGAAGTCGCGTTCTCAAGAATTTGCAGCAGGCTGTGGCCACTTCGCCGGAAAAGGAGGCCAGTGCATCAGAGAGCAAGATCACAGCTGTGAAGTCGCTTC";
-testStr="ATATAAATCGATATAAATCGATATAAATCGATATAAATCG";
+testStr = "AACTGTATGCGGAAAAGGAGGCCAGTGCATCAGAGAGTCGCAAACAGCTGTGAAGTCGCGTTCTCAAGAATTTGCAGCAGGCTGTGGCCACTTCGCCGGAAAAGGAGGCCAGTGCATCAGAGAGCAAGATCACAGCTGTGAAGTCGCTTC";
+// testStr="ATATAAATCGATATAAATCGATATAAATCGATATAAATCG";
 var app = angular.module('myApp', ['angularplasmid']);
     app.controller('myCtrl', function($scope, $compile, $element, $templateCache) {
         $scope.myRad= 200;
@@ -61,13 +61,18 @@ var app = angular.module('myApp', ['angularplasmid']);
 
         };
         $scope.annotate = function(start,end){
+          // don't bother
+          if(start==end){
+            return;
+          }
           if(start<0&&end<0){
             start+=$scope.seq.length;
             end+=$scope.seq.length;
           }
-          let result = annotate(start,end);
+          let result = annotate(Math.min(start,end), Math.max(start,end));
           $scope.start=0;
           $scope.end=0;
+
           if(!result){return;}
           $scope.showDNA('Annotated Frame ', start, end); 
           $scope.toggle('annotate'); 
@@ -75,6 +80,7 @@ var app = angular.module('myApp', ['angularplasmid']);
         };
         // reset highlighter
         $scope.reset = function(){$scope.start = 0;$scope.end = 0; $scope.toggle("dna"); $scope.title="";};
+        $scope.resetView = function(){$scope.view="";};
         $scope.resetSearch = function(){$scope.selectedEnd = false;$scope.selectedStart = false;};
         // removes the marker for the annotation, doesn't alter the sequence
         $scope.removeAnnotation = function(start,end){
@@ -105,8 +111,10 @@ var app = angular.module('myApp', ['angularplasmid']);
         $scope.deleteSequence = function(){deleteSequence();};
         $scope.editName = function(){editName();};
         $scope.editKeys = function(e){editKeys(e)};
-        $scope.editOrf = function(e){editOrf(e)};
+        $scope.editOrfMinLength = function(e){editOrfMinLength(e)};
         $scope.editInterval = function(e){editInterval(e)};
+        $scope.editSequence = function(){editSequence();};
+        $scope.submitSequence = function(start,end,e){submitSequence(Math.min(start,end),Math.max(start,end),e)};
     });
 
 
@@ -140,13 +148,69 @@ function toggle(newSelected){
   }
 }
 
+
+/*
+* Edits the dna sequence directly. Assumes start<end
+* @param{int} start = start index within the sequence
+* @param{int} end - end index within the sequence
+* @param{event} event - event object on keydown
+*/
+function submitSequence(start,end, event){
+   if(event.keyCode!=13){
+    return;
+  }
+  console.log(start,end);
+  event.preventDefault();
+  var scope = angular.element($("#divider")).scope();
+  var seq = scope.seq;
+  var ann = scope.annotations;
+  var newStr = document.getElementById("sampleeditor").innerText;
+  console.log(newStr);
+  if(start<0){
+    let beg = newStr.substring(Math.abs(start));
+    let mid = seq.substring(end, start+scope.seq.length);
+    let last = newStr.substring(0, Math.abs(start));
+    scope.seq = beg+mid+last;
+  }
+  // both indices are positive
+  else{
+    scope.seq = seq.substring(0,start)+newStr+seq.substring(end);
+  }
+  var oldEnd = scope.end;
+  var diff = newStr.length-Math.abs(end-start);
+  scope.end += diff;
+  scope.title = "Sample Frame "+scope.start+"-"+scope.end;
+
+  // shift annotations
+  for(x=0;x<ann.length;x++){
+    if(ann[x].start>=oldEnd){
+      ann[x].start+=diff;
+      ann[x].end+=diff;
+    }
+  }
+
+  document.getElementById("sampleeditor").setAttribute("contentEditable", "false");
+}
+
+
+
+
+/*
+* Allows for sequence editing
+*/
+
+function editSequence(){
+  var scope = angular.element($("#divider")).scope();
+  var editor = document.getElementById("sampleeditor");
+  editor.setAttribute("contentEditable", "true");
+}
+
 /*
 * Annotates section of the plasmid. Annotations may not overlap
 * @param{int} start - start index of the annotation
 * @param{int} end - end index of the annotation
 */
 function annotate(start, end){
-  if(start==end){return;}
   let oldStart = start;
   let oldEnd = end;
   start = Math.min(oldStart, oldEnd);
@@ -195,6 +259,13 @@ function submitAnnotation(){
     scope.seq = newStr;
     let oldEnd = scope.annotateEnd;
     var ann = scope.annotations;
+
+    // just move if the user deletes the whole sequence
+    if(editor.innerText.length==0){
+      ann = ann.filter(x=>x.start!=scope.annotateStart&&x.end!=scope.annotateEnd);
+      scope.annotations = ann;
+    }
+
     for(x=0;x<ann.length;x++){
       if(ann[x].start>=oldEnd){
         ann[x].start+=diff;
@@ -372,7 +443,11 @@ function editKeys(e){
   }
 }
 
-function editOrf(e){
+/*
+* Edits the minimum ORF length required
+* @param{event} e - event fired by editing 
+*/
+function editOrfMinLength(e){
   var orf = document.getElementById("orf");
   var scope = angular.element($("#divider")).scope();
   if(e.keyCode==13){
@@ -382,6 +457,11 @@ function editOrf(e){
     scope.orfsdata = findAllORF(scope.seq, scope.minLength);
   }
 }
+
+/*
+* Edits the interval length of tick marks
+* @param{event} e - event fired by editing 
+*/
 
 function editInterval(e){
   var interval = document.getElementById("interval");
