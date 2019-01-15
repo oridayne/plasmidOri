@@ -15,7 +15,7 @@ function setCaret() {
 }
 app.controller('myEditor',function($scope){
 
-	$scope.text="AATGCGTATGCGATGATGCGTTCTACTATCTCTCTCTAAGGGCCTAGCT";
+	$scope.text="AATGCGTATGCGATGATGCGTTCTACTATCTCTC";
 	$scope.complement = "";
 	$scope.savedSections = [];
 	$scope.len=20;
@@ -181,6 +181,7 @@ app.controller('myEditor',function($scope){
 				nextRow.value = $scope.sections[index+1][$scope.editing];
 				nextRow.focus();
 				$scope.setSelectionRange(nextRow, 1,1);
+
 			}
 			else{
 				console.log("couldn't find the new row?");
@@ -189,11 +190,14 @@ app.controller('myEditor',function($scope){
 			}
 		}
 		else{
+			console.log("sections?", $scope.sections);
+			console.log($scope.sections[index][0]);
 			$scope.newRow = false;
 			console.log("cursor position", cursor);
 			if((cursor+1)%6==0){
 				cursor+=1;
 			}
+			elt.value = $scope.sections[index][$scope.editing];
 			$scope.setSelectionRange(elt, cursor,cursor);
 
 			// $scope.setCaretPositionEnd(elt);

@@ -20,8 +20,8 @@
                 <p>
                     <div  class="rowwrapper">
 
-                        <input id="{{$index}}" ng-keydown="disable($event)" class="input" contenteditable ng-keyup="editRow($index, $event)" value="{{row[0]}}">
-                        <input id="{{$index}}" ng-keydown="disable($event)" class="input" contenteditable ng-keyup="editRow($index, $event)" value="{{row[1]}}" readonly>
+                        <input id="{{$index}}" ng-keydown="disable($event)" class="input" ng-model="row[0]" contenteditable ng-keyup="editRow($index, $event)" value="{{row[0]}}">
+                        <input id="{{$index}}" ng-model="row[1]" ng-keydown="disable($event)" class="input" contenteditable ng-keyup="editRow($index, $event)" value="{{row[1]}}" readonly>
                     </div>
                 </p>
             </div>
