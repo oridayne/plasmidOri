@@ -43,10 +43,12 @@ app.controller('myEditor',function($scope){
     	console.log("in finished!", index);
 
     	let children = angular.element((document.getElementById("dnaWrapper").children));
-    	console.log(children);
-		// let inputTarget = children[index].children[1].children[$scope.editing]; 
-		// console.log(inputTarget, inputTarget.value);
-		// $scope.setSelectionRange(inputTarget, ,cursor);
+    	console.log(children[index]);
+		let inputTarget = children[index].children[1].children[$scope.editing]; 
+		console.log(inputTarget, inputTarget.value);
+		console.log($scope.sections[index][$scope.editing]);
+		inputTarget.value =$scope.sections[index][$scope.editing];
+		$scope.setSelectionRange(inputTarget, 1,1);
     };
 
 	$scope.returnList = function(){
