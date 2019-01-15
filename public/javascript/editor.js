@@ -39,12 +39,14 @@ app.controller('myEditor',function($scope){
 		if(!$scope.newRow){
 			return;
 		}
-		console.log("in finished!");
     	let index = $scope.sections.length-1;
-    	let nextRow = document.getElementById(index);
-    	let children = angular.element((document.getElementById("wrapper").children));
-		let inputTarget = children[index].children[1].children[$scope.editing]; 
-		$scope.setCaretPositionEnd(inputTarget);		
+    	console.log("in finished!", index);
+
+    	let children = angular.element((document.getElementById("dnaWrapper").children));
+    	console.log(children);
+		// let inputTarget = children[index].children[1].children[$scope.editing]; 
+		// console.log(inputTarget, inputTarget.value);
+		// $scope.setSelectionRange(inputTarget, ,cursor);
     };
 
 	$scope.returnList = function(){
@@ -152,39 +154,48 @@ app.controller('myEditor',function($scope){
 		console.log(elt, elt.innerText);
 		let newVal = elt.value.toUpperCase();
 		console.log("newVal", newVal);
-
+		let cursor = angular.element(elt).prop('selectionStart');
 		let noSpace = newVal.replace(/\s/g, '');
 		let newText = $scope.text.substring(0,index*rowSize)+noSpace+$scope.text.substring((index*rowSize)+rowSize);
 		$scope.text=newText;
-		let cursor = window.getSelection().focusOffset;
 		let compStrand = getCompStrand(newVal);
 		console.log("comp strand", compStrand);
-		// $scope.sections=returnList(newText, $scope.buffer);
-		// let sub = $scope.sections[index][0];
 
 
-		// elt.innerText = sub;
-		// // adding character to the end
-		// console.log("newVal", newVal.length, "cursor", cursor, "buffer", $scope.buffer, "buffer space", $scope.bufferspace);
-		// if(newVal.length-1==($scope.buffer)&&cursor==($scope.buffer+$scope.bufferspace+1)){
-		// 	let nextRow = document.getElementById(index+1);
-		// 	if(nextRow){
-		// 		console.log("new row exists!");
-		// 		// next row exists, move onto next one
-		// 		$scope.newRow = false;
-		// 		nextRow.innerText = $scope.sections[index+1][$scope.editing];
-		// 		nextRow.focus();
-		// 		// $scope.setSelectionRange(nextRow, 1,1);
-		// 	}
-		// 	else{
-		// 		// next row does not exist, last $scope.finish execute placing cursor when list is rendered
-		// 		$scope.newRow = true;
-		// 	}
-		// }
-		// else{
-		// 	$scope.newRow = false;
-		// 	$scope.setCaretPositionEnd(elt);
-		// }
+		$scope.sections=returnList(newText, $scope.buffer);
+		let sub = $scope.sections[index][0];
+		elt.value = sub;
+		// adding character to the end
+		console.log("newVal", newVal.length, "cursor", cursor, "buffer", $scope.buffer, "buffer space", $scope.bufferspace);
+		console.log(newVal.length-1, ($scope.buffer+$scope.bufferspace));
+
+		if(newVal.length-1==($scope.buffer+$scope.bufferspace)&&cursor==newVal.length){
+			console.log("made it in here!");
+			let nextRow = document.getElementById(index+1);
+			if(nextRow){
+				console.log("new row exists!");
+				// next row exists, move onto next one
+				$scope.newRow = false;
+				nextRow.value = $scope.sections[index+1][$scope.editing];
+				nextRow.focus();
+				$scope.setSelectionRange(nextRow, 1,1);
+			}
+			else{
+				console.log("couldn't find the new row?");
+				// next row does not exist, last $scope.finish execute placing cursor when list is rendered
+				$scope.newRow = true;
+			}
+		}
+		else{
+			$scope.newRow = false;
+			console.log("cursor position", cursor);
+			if((cursor+1)%6==0){
+				cursor+=1;
+			}
+			$scope.setSelectionRange(elt, cursor,cursor);
+
+			// $scope.setCaretPositionEnd(elt);
+		}
 
 		
 	},

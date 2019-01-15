@@ -15,14 +15,17 @@
               <li ng-repeat="name in names track by $index">{{name}} {{$index}}</li>
             </ul>
 
-            <div ng-repeat="row in sections  track by $index">
-                <p>
-                <div class="rowwrapper">
+            <div ng-repeat="row in sections  track by $index"  ng-init="$last && finished()">
+                
+                <div id="dnaWrapper">
+                    <p>
+                    <div  class="rowwrapper">
 
-                    <input id="{{$index}}" ng-keydown="disable($event)" class="input" contenteditable ng-keyup="editRow($index, $event)" value="{{row[0]}}">
-                    <input id="{{$index}}" ng-keydown="disable($event)" class="input" contenteditable ng-keyup="editRow($index, $event)" value="{{row[1]}}" readonly>
+                        <input id="{{$index}}" ng-keydown="disable($event)" class="input" contenteditable ng-keyup="editRow($index, $event)" value="{{row[0]}}">
+                        <input id="{{$index}}" ng-keydown="disable($event)" class="input" contenteditable ng-keyup="editRow($index, $event)" value="{{row[1]}}" readonly>
+                    </div>
+                    </p>
                 </div>
-                </p>
             </div>
         </br>
             <div ng-repeat="row in sections  track by $index">
