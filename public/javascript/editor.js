@@ -15,7 +15,7 @@ function setCaret() {
 }
 app.controller('myEditor',function($scope){
 
-	$scope.text="AATGCGTATGCGATGATGCGTTCTACTATCTCTC";
+	$scope.text="AATGCGTATGCGATGATGCGTTCTACTATCTCTCGCGTAC";
 	$scope.complement = "";
 	$scope.savedSections = [];
 	$scope.len=20;
@@ -114,24 +114,21 @@ app.controller('myEditor',function($scope){
 		console.log(event.keyCode);
 		$scope.editing = 0;
 		let rowSize = $scope.buffer;
-
+		let elt = document.getElementById(index);
+		let newVal = elt.value.toUpperCase();
+		let noSpace = newVal.replace(/\s/g, '');
+		let compRow = document.getElementById(index+"row2");
 		if(event.keyCode!=13){
-			let elt = document.getElementById(index);
-			console.log(elt, elt.innerText);
-			let newVal = elt.value.toUpperCase();
-			console.log("newVal", newVal);
-			let cursor = angular.element(elt).prop('selectionStart');
-			let noSpace = newVal.replace(/\s/g, '');
-			let newText = $scope.text.substring(0,index*rowSize)+noSpace+$scope.text.substring((index*rowSize)+rowSize);
-			$scope.text=newText;
-			let compRow = document.getElementById(index+"row2");
-
+			
 			compRow.value = getCompStrand(newVal);
 		}
 		else{
-			console.log("I am here!");
+			let newText = $scope.text.substring(0,index*rowSize)+noSpace+$scope.text.substring((index*rowSize)+rowSize);
+			$scope.text=newText;
 			console.log($scope.text);
+			console.log(returnList($scope.text, $scope.buffer));
 			$scope.sections = returnList($scope.text, $scope.buffer);
+			compRow.value = $scope.sections[index][1];
 		}
 
 	},
