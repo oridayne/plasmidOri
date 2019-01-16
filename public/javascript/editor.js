@@ -1,7 +1,7 @@
 var app = angular.module('textApp', []);
 
 var acceptedLetters = {"a":true, "g":true, "c":true, "t":true, "A":true, "G":true, "C":true, "T":true, " ":true};
-var acceptedKeys = {"Shift":true, "Backspace":true, "ArrowLeft":true, "ArrowRight":true};
+var acceptedKeys = {"Shift":true, "Backspace":true, "ArrowLeft":true, "ArrowRight":true, "Enter": true};
 var converter = {"A":"T", "T":"A", "G":"C", "C":"G", " ":" "};
 function setCaret() {
     var el = document.getElementById("editable");
@@ -48,7 +48,7 @@ app.controller('myEditor',function($scope){
 		console.log(inputTarget, inputTarget.value);
 		console.log($scope.sections[index][$scope.editing]);
 		inputTarget.value =$scope.sections[index][$scope.editing];
-		$scope.setSelectionRange(inputTarget, 1,1);
+		$scope.setSelectionRange(inputTarget, inputTarget.value.length,inputTarget.value.length);
     };
 
 	$scope.returnList = function(){
@@ -63,11 +63,16 @@ app.controller('myEditor',function($scope){
 		$scope.savedSections = $scope.sections;
 	}
 	// disable typing in anything a g c t, shift, arrowLeft, arrowRight, Backspace
-	$scope.disable=function(event){
+	$scope.disable=function(index, event){
 		if(!acceptedLetters[event.key]&&!acceptedKeys[event.key]){
 			event.preventDefault();
 			return;
 		}
+		if(acceptedLetters[event.key.toUpperCase()]){
+			let compRow = document.getElementById(index+"row2");
+			compRow.value+=converter[event.key.toUpperCase()];
+		}
+
 	}
 	// sets cursor
 	$scope.setSelectionRange = function(input, selectionStart, selectionEnd) {
@@ -83,42 +88,7 @@ app.controller('myEditor',function($scope){
 	      range.select();
 	    }
 	};
-	// // edits first strand and updates complementary
-	// $scope.editRow=function(index, event){
-	// 	console.log("firstrow", event.key);
-	// 	console.log(event.keyCode);
-	// 	$scope.editing = 0;
-	// 	// prevent processing on anything but accepted Letters and backspace
-	// 	if(!acceptedLetters[event.key] && (event.key!="Backspace")){
-	// 		return;
-	// 	}
-	// 	let elt = document.getElementById(index);
-	// 	let cursor = angular.element(elt).prop('selectionStart');
-	// 	let newVal = elt.value.toUpperCase();
-	// 	let newText = $scope.text.substring(0,index*$scope.buffer)+newVal+$scope.text.substring((index*$scope.buffer)+$scope.buffer);
-	// 	$scope.text=newText;
-	// 	$scope.sections=returnList(newText, $scope.buffer);
-	// 	let sub = $scope.sections[index][0];
-	// 	elt.value = sub; // reset if exceeds character overflow
-	// 	// adding character to the end
-	// 	if(newVal.length-1==$scope.buffer&&cursor==newVal.length){
-	// 		let nextRow = document.getElementById(index+1);
-	// 		if(nextRow){
-	// 			// next row exists, move onto next one
-	// 			$scope.newRow = false;
-	// 			nextRow.value = $scope.sections[index+1][$scope.editing];
-	// 			$scope.setSelectionRange(nextRow, 1,1);
-	// 		}
-	// 		else{
-	// 			// next row does not exist, last $scope.finish execute placing cursor when list is rendered
-	// 			$scope.newRow = true;
-	// 		}
-	// 	}
-	// 	else{
-	// 		$scope.newRow = false;
-	// 		$scope.setSelectionRange(elt, cursor, cursor);
-	// 	}
-	// },
+
 	// // edits first strand and updates complementary
 	$scope.setCaretPosition = function(elt, pos){
 		elt.focus();
@@ -148,62 +118,23 @@ app.controller('myEditor',function($scope){
 		console.log(event.keyCode);
 		$scope.editing = 0;
 		let rowSize = $scope.buffer;
-		// prevent processing on anything but accepted Letters and backspace
-		if(!acceptedLetters[event.key] && (event.key!="Backspace")){
-			return;
-		}
-		let elt = document.getElementById(index);
-		console.log(elt, elt.innerText);
-		let newVal = elt.value.toUpperCase();
-		console.log("newVal", newVal);
-		let cursor = angular.element(elt).prop('selectionStart');
-		let noSpace = newVal.replace(/\s/g, '');
-		let newText = $scope.text.substring(0,index*rowSize)+noSpace+$scope.text.substring((index*rowSize)+rowSize);
-		$scope.text=newText;
-		let compStrand = getCompStrand(newVal);
-		console.log("comp strand", compStrand);
 
-
-		$scope.sections=returnList(newText, $scope.buffer);
-		let sub = $scope.sections[index][0];
-		elt.value = sub;
-		// adding character to the end
-		console.log("newVal", newVal.length, "cursor", cursor, "buffer", $scope.buffer, "buffer space", $scope.bufferspace);
-		console.log(newVal.length-1, ($scope.buffer+$scope.bufferspace));
-
-		if(newVal.length-1==($scope.buffer+$scope.bufferspace)&&cursor==newVal.length){
-			console.log("made it in here!");
-			let nextRow = document.getElementById(index+1);
-			if(nextRow){
-				console.log("new row exists!");
-				// next row exists, move onto next one
-				$scope.newRow = false;
-				nextRow.value = $scope.sections[index+1][$scope.editing];
-				nextRow.focus();
-				$scope.setSelectionRange(nextRow, 1,1);
-
-			}
-			else{
-				console.log("couldn't find the new row?");
-				// next row does not exist, last $scope.finish execute placing cursor when list is rendered
-				$scope.newRow = true;
-			}
+		if(event.keyCode!=13){
+			let elt = document.getElementById(index);
+			console.log(elt, elt.innerText);
+			let newVal = elt.value.toUpperCase();
+			console.log("newVal", newVal);
+			let cursor = angular.element(elt).prop('selectionStart');
+			let noSpace = newVal.replace(/\s/g, '');
+			let newText = $scope.text.substring(0,index*rowSize)+noSpace+$scope.text.substring((index*rowSize)+rowSize);
+			$scope.text=newText;
 		}
 		else{
-			console.log("sections?", $scope.sections);
-			console.log($scope.sections[index][0]);
-			$scope.newRow = false;
-			console.log("cursor position", cursor);
-			if((cursor+1)%6==0){
-				cursor+=1;
-			}
-			elt.value = $scope.sections[index][$scope.editing];
-			$scope.setSelectionRange(elt, cursor,cursor);
-
-			// $scope.setCaretPositionEnd(elt);
+			console.log("I am here!");
+			console.log($scope.text);
+			$scope.sections = returnList($scope.text, $scope.buffer);
 		}
 
-		
 	},
 	// on enter
 	$scope.saveRow = function(index, event){
