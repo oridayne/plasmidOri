@@ -68,10 +68,6 @@ app.controller('myEditor',function($scope){
 			event.preventDefault();
 			return;
 		}
-		if(acceptedLetters[event.key.toUpperCase()]){
-			let compRow = document.getElementById(index+"row2");
-			compRow.value+=converter[event.key.toUpperCase()];
-		}
 
 	}
 	// sets cursor
@@ -128,6 +124,9 @@ app.controller('myEditor',function($scope){
 			let noSpace = newVal.replace(/\s/g, '');
 			let newText = $scope.text.substring(0,index*rowSize)+noSpace+$scope.text.substring((index*rowSize)+rowSize);
 			$scope.text=newText;
+			let compRow = document.getElementById(index+"row2");
+
+			compRow.value = getCompStrand(newVal);
 		}
 		else{
 			console.log("I am here!");
