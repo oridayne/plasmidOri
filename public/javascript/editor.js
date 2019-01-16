@@ -1,24 +1,17 @@
 var app = angular.module('textApp', []);
 
 var acceptedLetters = {"a":true, "g":true, "c":true, "t":true, "A":true, "G":true, "C":true, "T":true, " ":true};
+// DENG: maybe, test on windows for control?
 var acceptedKeys = {"Shift":true, "Backspace":true, "ArrowLeft":true, "ArrowRight":true, "Enter": true};
+
+var meta = {"c":true, "z":true, "v":true};
 var converter = {"A":"T", "T":"A", "G":"C", "C":"G", " ":" "};
-function setCaret() {
-    var el = document.getElementById("editable");
-    var range = document.createRange();
-    var sel = window.getSelection();
-    range.setStart(el.childNodes[0], 10);
-    range.collapse(true);
-    sel.removeAllRanges();
-    sel.addRange(range);
-    el.focus();
-}
+
+
 app.controller('myEditor',function($scope){
 
-	$scope.text="AATGCGTATGCGATGATGCGTTCTACTATCTCTCGCGTAC";
-	$scope.complement = "";
-	$scope.savedSections = [];
-	$scope.len=20;
+	$scope.text="AATGCGTATGCGATGATGCGTTCTACTATCTCTCGCGTACCGATGATGCGTTCTACTATCTTCGATGCTAGCTATTCGATTTA";
+
 	// dna base pairs per line
 	$scope.buffer = 20;
 	$scope.bucket = 5;
@@ -27,7 +20,6 @@ app.controller('myEditor',function($scope){
 
 	$scope.names = ["lisa", "daiv", "matt", "lot"];
 	$scope.sections =returnList($scope.text, $scope.buffer);
-	$scope.spaced = generateSpace($scope.text, $scope.buffer, $scope.bucket)
 	$scope.display = "default";
 	$scope.newRow = true;
 	// which strand we are currently editing, 0 or 1, first or second in a row 
@@ -58,16 +50,21 @@ app.controller('myEditor',function($scope){
 		}
 		$scope.sections = result;
 		return result;
-	},
-	$scope.startEditing = function(){
-		$scope.savedSections = $scope.sections;
 	}
 	// disable typing in anything a g c t, shift, arrowLeft, arrowRight, Backspace
 	$scope.disable=function(index, event){
+		console.log(event);
+
+		// allow for (Ctrl|Meta) c,v,z copy, paste, undo
+		if((event.ctrlKey==true||event.metaKey==true)&&meta[event.key]){
+			return;
+		}
+		// disallow anything but the accepted letters and keys
 		if(!acceptedLetters[event.key]&&!acceptedKeys[event.key]){
 			event.preventDefault();
 			return;
 		}
+
 
 	}
 	// sets cursor
@@ -85,30 +82,6 @@ app.controller('myEditor',function($scope){
 	    }
 	};
 
-	// // edits first strand and updates complementary
-	$scope.setCaretPosition = function(elt, pos){
-		elt.focus();
-		var range = document.createRange();
-		var sel = window.getSelection();
-		let focus = sel.focusNode;
-		range.selectNode(focus);
-		range.setStart(focus, pos);
-		range.collapse(true);
-		sel.removeAllRanges();
-		sel.addRange(range);
-		elt.focus();
-	}
-	$scope.setCaretPositionEnd = function(elt){
-		elt.focus();
-		var range = document.createRange();
-		var sel = window.getSelection();
-		let focus = sel.focusNode;
-		range.selectNode(focus);
-		range.collapse(false);
-		sel.removeAllRanges();
-		sel.addRange(range);
-		elt.focus();
-	}
 	$scope.editRow=function(index, event){
 		console.log("firstrow", event.key);
 		console.log(event.keyCode);
@@ -118,23 +91,18 @@ app.controller('myEditor',function($scope){
 		let newVal = elt.value.toUpperCase();
 		let noSpace = newVal.replace(/\s/g, '');
 		let compRow = document.getElementById(index+"row2");
+
 		if(event.keyCode!=13){
-			
-			compRow.value = getCompStrand(newVal);
+			$scope.sections[index][1] = getCompStrand(newVal);
 		}
+		// save it
 		else{
 			let newText = $scope.text.substring(0,index*rowSize)+noSpace+$scope.text.substring((index*rowSize)+rowSize);
 			$scope.text=newText;
 			console.log($scope.text);
 			console.log(returnList($scope.text, $scope.buffer));
 			$scope.sections = returnList($scope.text, $scope.buffer);
-			compRow.value = $scope.sections[index][1];
 		}
-
-	},
-	// on enter
-	$scope.saveRow = function(index, event){
-		if(event.keyCode!=13){return;}
 
 	},
 	// edits second strand and update complementary
@@ -143,7 +111,7 @@ app.controller('myEditor',function($scope){
 		console.log(event.keyCode);
 		$scope.editing = 1;
 		// prevent processing on anything but accepted Letters and backspace
-		if(!acceptedLetters[event.key] && (event.key!="Backspace")){
+		if(!acceptedLetters[event.key] && (event.key!="Backspace")&&(event.key!="Enter")){
 			return;
 		}
 		let elt = document.getElementById(index+"row2");
@@ -187,41 +155,13 @@ app.controller('myEditor',function($scope){
 		if(style=="default"){
 			$scope.sections =returnList($scope.text, $scope.buffer);
 		}
-		if(style=="space"){
-			$scope.spaced = generateSpace($scope.text, $scope.buffer, $scope.bucket);
-		}
+
 	}
 
 });
 
-function returnCompRow(text){
-	let strand = "";
-	for(x=0;x<text.length;x++){
-		strand+=converter[text[x]];
-	}
-	return strand;
-}
-// console.log("generating the space!");
-// console.log(generateSpace("AATGCGTATGCGATGATGCGTT", 10, 5));
 
-function generateSpace(text, buffer, bucket){
-	let result = [];
 
-	for(x=0;x<text.length;x+=buffer){
-		let strand = [];
-		let comp = [];
-		let line = text.substring(x,x+buffer);
-		for(y=0;y<buffer; y+=bucket){
-		    let seg = line.substring(y, y+bucket);
-		    if(seg.length==0){break;}
-			strand.push(seg);
-			comp.push(getCompStrand(seg));
-		}
-		result.push([strand,comp]);
-	}
-	console.log("resuot", result);
-	return result;
-}
 
 // returns comp strand 
 function getCompStrand(strand){
@@ -238,7 +178,6 @@ function returnList(text, buffer){
 	let bucket = 5;
 
 	for(x=0;x<text.length;x+=buffer){
-		// uncomment when I want to work on spacing
 		let strand = "";
 		for(y=x;y<x+buffer;y+=bucket){
 			let seg = text.substring(y, y+bucket); 
@@ -251,10 +190,7 @@ function returnList(text, buffer){
 			}
 		}
 		threeFive = strand;
-		// let threeFive = text.substring(x,x+buffer);
-		let fiveThree=getCompStrand(threeFive);
-		
-		
+		let fiveThree=getCompStrand(threeFive);		
 		result.push([threeFive,  fiveThree]);
 	}
 	console.log(result);

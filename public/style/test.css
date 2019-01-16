@@ -12,6 +12,13 @@
 	width: 100px;
 }
 
+#dnaWrapper{
+	outline:1px solid silver;
+}
+
+#dnaWrapper:focus{
+	outline:1px solid blue;
+}
 
 .testInput{
 	word-spacing: 20px;
@@ -59,22 +66,8 @@
 	word-spacing: 30px;
  
 }
-.spacerowwrapper{
-	display: flex;
-	width: auto;
-}
 
-.spacerow{
-	width: 150px;
-	text-transform:uppercase;
-	/*outline: none;*/
-	/*border: 0;*/
-	letter-spacing: 0.5px;
-	font-size: 16px;
-	font-family: "Courier New", Courier, monospace;
-}
-
-#single{
+.single{
 	letter-spacing: 0.5px;
 	font-size: 16px;
 	font-family: "Courier New", Courier, monospace;

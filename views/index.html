@@ -11,39 +11,26 @@
     </head>
     <body>
         <div ng-app="textApp" ng-controller="myEditor">
-            <ul>
-              <li ng-repeat="name in names track by $index">{{name}} {{$index}}</li>
-            </ul>
-            <div id="dnaWrapper">
-            <div ng-repeat="row in sections  track by $index"  ng-init="$last && finished()">
-                
-                <p>
-                    <div  class="rowwrapper">
+            <label class="container">Default
+              <input type="radio" checked="checked" name="radio" ng-click="switchDisplay('default')">
+            </label>
+            <label class="container">Single
+              <input type="radio" name="radio" ng-click="switchDisplay('single')">
+            </label>
 
-                        <input id="{{$index}}" ng-keydown="disable($index, $event)" class="input" ng-model="row[0]" contenteditable ng-keyup="editRow($index, $event)">
-                        <input id="{{$index}}row2" ng-model="row[1]" ng-keydown="disable($index, $event)" class="input" contenteditable ng-keyup="editRow($index, $event)">
-                    </div>
-                </p>
+            <div ng-show="display=='default'" id="dnaWrapper">
+                <div ng-repeat="row in sections  track by $index"  ng-init="$last && finished()">
+                    <p>
+                        <div  class="rowwrapper">
+                            <input id="{{$index}}" ng-keydown="disable($index, $event)" class="input" ng-model="row[0]" contenteditable ng-keyup="editRow($index, $event)">
+                            <input id="{{$index}}row2" ng-model="row[1]" ng-keydown="disable($index, $event)" class="input" contenteditable ng-keyup="editRow($index, $event)">
+                        </div>
+                    </p>
+                </div>
             </div>
-            </div>
-        </br>
-            <div ng-repeat="row in sections  track by $index">
-                <div id="{{$index}}" contenteditable>{{row}}</div>
-            </div>
-
-            <input class="row" ng-model="text" ng-keyup="returnList()">
-
-
-
-
-            <div ng-bind="text"></div>
-            <div class="rowwrapper">
-                <div class="row"  ng-model="text" ng-keydown="returnList()" contenteditable="true"></div>
-                <div class="row" contenteditable="true">here</div>
-            </div>
-            <div class="rowwrapper">
-                <div class="row">here</div>
-                <div class="row">here</div>
+            <div ng-show="display=='single'">
+                <textarea ng-model="text" class="single">
+                </textarea>
             </div>
         </div>
     </body>
