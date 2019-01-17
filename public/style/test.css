@@ -6,36 +6,101 @@
 
 }
 
+.indiceWrapper{
+	display:flex;
+	/*outline: 1px solid red;*/
+
+}
+.indiceItem{
+	/*outline: 1px solid blue;*/
+	width: 142px;
+	font-size: 16px;
+	font-family: "Courier New", Courier, monospace;
+}
+
 .rowwrapper{
 	display:flex;
 	flex-direction:column;
 	width: 100px;
 }
 
+.lineNumber{
+	width: 800px;
+	height:20px;
+	outline: 1px solid silver;
+	margin: auto;
+	margin-left: 1px;
+	margin-top: 1px;
+	margin-bottom: 5px;
+	font-size: 16px;
+	font-family: "Courier New", Courier, monospace;
+}
+.numberHolder{
+	outline: 1px solid red;
+	width: 20px;
+}
+
 #dnaWrapper{
+	width: 820px;
+}
+
+.unsaved{
+	outline:1px solid steelblue;
+}
+
+.saved{
 	outline:1px solid silver;
+
 }
 
 #dnaWrapper:focus{
 	outline:1px solid blue;
+	width:820px;
 }
 
 .testInput{
 	word-spacing: 20px;
 }
 
+
+#saveButton{
+  border: 1px solid silver;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 20px;
+  border-radius: 3px;
+
+}
+
+.unsavedButton{
+	color:#4CAF50;
+}
+
+.savedButton{
+	color:black;
+}
+#saveButton:focus{
+	outline:none;
+}
+
+#saveButton:active {
+	background-color: #4CAF50;;
+    color: white;
+}
+
 .input{
 	width:800px;
 	text-transform:uppercase;
-	/*outline: none;*/
+	outline: none;
 	/*border: 0;*/
 	word-spacing: 30px;
-
 	letter-spacing: 0.5px;
 	font-size: 16px;
 	font-family: "Courier New", Courier, monospace;
 
 }
+
 
 .odd{
 	 text-transform: uppercase;
@@ -43,7 +108,6 @@
 	word-spacing: 30px;
 	margin-bottom: 0px;
 	white-space: nowrap;
-	/*outline: 1px solid silver;*/
 	outline: 1px solid silver;
 	font-size: 16px;
 	font-family: "Courier New", Courier, monospace;

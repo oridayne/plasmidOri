@@ -4,30 +4,48 @@ var acceptedLetters = {"a":true, "g":true, "c":true, "t":true, "A":true, "G":tru
 // DENG: maybe, test on windows for control?
 var acceptedKeys = {"Shift":true, "Backspace":true, "ArrowLeft":true, "ArrowRight":true, "Enter": true};
 
-var meta = {"c":true, "z":true, "v":true};
+var meta = {"c":true, "z":true, "v":true, "s":true};
 var converter = {"A":"T", "T":"A", "G":"C", "C":"G", " ":" "};
 
 
+// TODO:
+// - move cursor to end upon enter 
+// get second line to work
+// disable bad characters for single line
+//
+
 app.controller('myEditor',function($scope){
 
-	$scope.text="AATGCGTATGCGATGATGCGTTCTACTATCTCTCGCGTACCGATGATGCGTTCTACTATCTTCGATGCTAGCTATTCGATTTA";
-
+	$scope.text="AATGCGTATGCGATGATGCGTTCTACTATCTCTCGCGTACCGATGATGCGTTCTACTATCTTCGAT";
+	$scope.textbuffer = $scope.text;
 	// dna base pairs per line
-	$scope.buffer = 20;
-	$scope.bucket = 5;
+	$scope.editStart = 0;
+	$scope.buffer = 50;
+	$scope.bucket = 10;
+	$scope.row1 = 0;
+	$scope.row2 = 1;
+	$scope.rowIndices = generateIndices(50, 10);
 	// allowance for spacing
 	$scope.bufferspace = $scope.buffer/$scope.bucket-1;
 
-	$scope.names = ["lisa", "daiv", "matt", "lot"];
-	$scope.sections =returnList($scope.text, $scope.buffer);
+	$scope.sections =returnList($scope.text, $scope.buffer, $scope.bucket);
 	$scope.display = "default";
 	$scope.newRow = true;
 	// which strand we are currently editing, 0 or 1, first or second in a row 
 	$scope.editing = 0;
-	
+	$scope.lineDisplay = true;
+	$scope.switchLine = function(style){
+		if($scope.lineDisplay){
+			$scope.lineDisplay=false;
+		}
+		else{
+			$scope.lineDisplay=true;
+		}
+
+	}
 	// for every newly rendered row in the editor, set the cursor to the end
 	// also executed when user creates new row by entering in base pairs
-	$scope.finished = function(test) {
+	$scope.finished = function() {
 		if(!$scope.newRow){
 			return;
 		}
@@ -43,6 +61,16 @@ app.controller('myEditor',function($scope){
 		$scope.setSelectionRange(inputTarget, inputTarget.value.length,inputTarget.value.length);
     };
 
+    $scope.startEditing = function(index, event){
+    	document.getElementById("dnaWrapper").className = "unsaved";
+    	document.getElementById("saveButton").className = "unsavedButton";
+    	let elt = event.srcElement;
+    	let cursor = angular.element(elt).prop('selectionStart');
+    	let numSpaces = elt.value.length%$scope.buffer;
+    	// $scope.editStart = index*$scope.buffer+cursor;
+    	console.log("starting edit", $scope.editStart, elt.value.length);
+    	console.log("cursor", cursor);
+    }
 	$scope.returnList = function(){
 		let result = [];
 		for(x=0;x<$scope.text.length;x+=$scope.buffer){
@@ -53,20 +81,23 @@ app.controller('myEditor',function($scope){
 	}
 	// disable typing in anything a g c t, shift, arrowLeft, arrowRight, Backspace
 	$scope.disable=function(index, event){
-		console.log(event);
-
 		// allow for (Ctrl|Meta) c,v,z copy, paste, undo
-		if((event.ctrlKey==true||event.metaKey==true)&&meta[event.key]){
+		// for saving
+		if((event.ctrlKey==true||event.metaKey==true)&&event.key=="s"){
+			$scope.saveProgress(index);
 			return;
 		}
+		if((event.ctrlKey==true||event.metaKey==true)){
+			return;
+		}
+
 		// disallow anything but the accepted letters and keys
 		if(!acceptedLetters[event.key]&&!acceptedKeys[event.key]){
 			event.preventDefault();
 			return;
 		}
-
-
 	}
+
 	// sets cursor
 	$scope.setSelectionRange = function(input, selectionStart, selectionEnd) {
 	    if (input.setSelectionRange) {
@@ -81,10 +112,35 @@ app.controller('myEditor',function($scope){
 	      range.select();
 	    }
 	};
+	// save all current progress permanently
+	$scope.saveProgress = function(){
 
+		document.getElementById("dnaWrapper").className = "saved";
+		document.getElementById("saveButton").className = "savedButton";
+		$scope.text = $scope.textbuffer;
+	}
+
+	// on a row blue, save to temporary buffer
+	$scope.saveToBuffer = function(index, row){
+		let rowSize = $scope.buffer;
+		let elt=false;
+		let newVal = "";
+		if(row==$scope.row1){
+			elt = document.getElementById(index);
+			newVal = elt.value.toUpperCase().replace(/\s/g, '');
+		}
+		else{
+			elt = document.getElementById(index+"row2");
+			newVal = elt.value.toUpperCase().replace(/\s/g, '');
+			newVal = getCompStrand(newVal);
+
+		}
+		let newText = $scope.textbuffer.substring(0,index*rowSize)+newVal+$scope.textbuffer.substring((index*rowSize)+rowSize);
+		$scope.textbuffer = newText;
+		$scope.sections = returnList($scope.textbuffer, $scope.buffer, $scope.bucket);
+	},
 	$scope.editRow=function(index, event){
-		console.log("firstrow", event.key);
-		console.log(event.keyCode);
+		// console.log("firstrow", event.key);
 		$scope.editing = 0;
 		let rowSize = $scope.buffer;
 		let elt = document.getElementById(index);
@@ -97,69 +153,45 @@ app.controller('myEditor',function($scope){
 		}
 		// save it
 		else{
-			let newText = $scope.text.substring(0,index*rowSize)+noSpace+$scope.text.substring((index*rowSize)+rowSize);
-			$scope.text=newText;
-			console.log($scope.text);
-			console.log(returnList($scope.text, $scope.buffer));
-			$scope.sections = returnList($scope.text, $scope.buffer);
+			$scope.saveToBuffer(index, $scope.row1);
 		}
 
 	},
 	// edits second strand and update complementary
 	$scope.editSecondRow = function(index, event){
-		console.log("second row", event.key);
-		console.log(event.keyCode);
 		$scope.editing = 1;
-		// prevent processing on anything but accepted Letters and backspace
-		if(!acceptedLetters[event.key] && (event.key!="Backspace")&&(event.key!="Enter")){
-			return;
-		}
+		let rowSize = $scope.buffer;
 		let elt = document.getElementById(index+"row2");
-		let cursor = angular.element(elt).prop('selectionStart');
 		let newVal = elt.value.toUpperCase();
-		let comp = "";
-		for(x=0;x<newVal.length;x++){
-			comp+=converter[newVal[x]]
+		let noSpace = newVal.replace(/\s/g, '');
+		let compRow = document.getElementById(index);
+
+		if(event.keyCode!=13){
+			$scope.sections[index][0] = getCompStrand(newVal);
 		}
-		let newText = $scope.text.substring(0,index*$scope.buffer)+comp+$scope.text.substring((index*$scope.buffer)+$scope.buffer);
-		$scope.text=newText;
-		$scope.sections=returnList(newText, $scope.buffer);
-		let sub = $scope.sections[index][1];
-		elt.value = sub;
-		document.getElementById(index).value = $scope.sections[index][0];
-		// adding character to the end
-		if(newVal.length-1==$scope.buffer&&cursor==newVal.length){
-			// let $scope.finished handle this
-			// this case means the user created a new row while editing, and this row can only be accessed when the list
-			// finishes rendering
-			let nextRow = document.getElementById(index+1+"row2");
-			if(nextRow){
-				// next row exists, move onto next one
-				$scope.newRow = false;
-				nextRow.value = $scope.sections[index+1][$scope.editing];
-				$scope.setSelectionRange(nextRow, 1,1);
-			}
-			else{
-				// next row does not exist, last $scope.finish execute placing cursor when list is rendered
-				$scope.newRow = true;
-			}
-		}
+		// save it
 		else{
-			$scope.newRow = false;
-			$scope.setSelectionRange(elt, cursor, cursor);
+			$scope.saveToBuffer(index, $scope.row2);
 		}
 	}
 	$scope.switchDisplay = function(style){
 		$scope.display = style;
 		// back to double strand
 		if(style=="default"){
-			$scope.sections =returnList($scope.text, $scope.buffer);
+			$scope.sections =returnList($scope.textbuffer, $scope.buffer, $scope.bucket);
 		}
 
 	}
 
 });
 
+function generateIndices(buffer, bucket){
+	let result = [];
+	for(x=0;x<buffer;x+=bucket){
+		result.push(x);
+	}
+	return result;
+}
 
 
 
@@ -173,9 +205,8 @@ function getCompStrand(strand){
 }
 
 // returns complementary strand for rendering 
-function returnList(text, buffer){
+function returnList(text, buffer, bucket){
 	let result = [];
-	let bucket = 5;
 
 	for(x=0;x<text.length;x+=buffer){
 		let strand = "";
