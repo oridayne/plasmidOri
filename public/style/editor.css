@@ -58,9 +58,19 @@
 	width:820px;
 }
 
-.testInput{
-	word-spacing: 20px;
+#singleEditor{
+	text-transform:uppercase;
+	letter-spacing: 0.5px;
+	font-size: 16px;
+	font-family: "Courier New", Courier, monospace;
+	width: 500px;
+	height: 500px;	
+	line-height:25px;
+	border:none;
+	resize: none;
+	/*outline: 1px solid silver;*/
 }
+
 
 
 #saveButton{
@@ -93,49 +103,17 @@
 	width:800px;
 	text-transform:uppercase;
 	outline: none;
-	/*border: 0;*/
+	border: 0;
 	word-spacing: 30px;
 	letter-spacing: 0.5px;
 	font-size: 16px;
 	font-family: "Courier New", Courier, monospace;
 
 }
-
-
-.odd{
-	 text-transform: uppercase;
-	width: 600px;
-	word-spacing: 30px;
-	margin-bottom: 0px;
-	white-space: nowrap;
-	outline: 1px solid silver;
-	font-size: 16px;
-	font-family: "Courier New", Courier, monospace;
-}
-
-.even{
-	text-transform: uppercase;
-	width: 600px;
-	word-spacing: 30px;
-	margin-top:1px;
-	white-space: nowrap;
-	margin-bottom: 0px;
-	outline: 1px solid silver;
-	font-size: 16px;
-	font-family: "Courier New", Courier, monospace;
-}
-
 
 .textSpace{
 	word-spacing: 30px;
  
 }
 
-.single{
-	letter-spacing: 0.5px;
-	font-size: 16px;
-	font-family: "Courier New", Courier, monospace;
-	width: 500px;
-	height: 500px;	
-	line-height:25px;
-}
+

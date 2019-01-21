@@ -10,9 +10,8 @@ var converter = {"A":"T", "T":"A", "G":"C", "C":"G", " ":" "};
 
 // TODO:
 // - move cursor to end upon enter 
-// get second line to work
 // disable bad characters for single line
-//
+// fix saving and stuff for single line
 
 app.controller('myEditor',function($scope){
 
@@ -35,7 +34,7 @@ app.controller('myEditor',function($scope){
 	$scope.editing = 0;
 	$scope.lineDisplay = true;
 	$scope.switchLine = function(style){
-		if($scope.lineDisplay){
+		if(style=="on"){
 			$scope.lineDisplay=false;
 		}
 		else{
@@ -61,7 +60,7 @@ app.controller('myEditor',function($scope){
 		$scope.setSelectionRange(inputTarget, inputTarget.value.length,inputTarget.value.length);
     };
 
-    $scope.startEditing = function(index, event){
+    $scope.startEditing = function(event){
     	document.getElementById("dnaWrapper").className = "unsaved";
     	document.getElementById("saveButton").className = "unsavedButton";
     	let elt = event.srcElement;
@@ -70,6 +69,22 @@ app.controller('myEditor',function($scope){
     	// $scope.editStart = index*$scope.buffer+cursor;
     	console.log("starting edit", $scope.editStart, elt.value.length);
     	console.log("cursor", cursor);
+    },
+
+    $scope.startEditingSingle = function(event){
+    	let elt = event.srcElement;
+		console.log(elt);    	
+		document.getElementById("saveButton").className = "unsavedButton";
+    	elt.classList.remove("saved");
+    	elt.classList.add("unsaved");
+    	// document.getElementById("saveButton").className = "unsavedButton";
+    }
+    $scope.stopEditingSingle = function(event){
+    	let elt = event.srcElement;
+    	elt.classList.remove("unsaved");
+    	elt.classList.add("saved");
+    	document.getElementById("saveButton").className = "savedButton";
+
     }
 	$scope.returnList = function(){
 		let result = [];
@@ -80,11 +95,11 @@ app.controller('myEditor',function($scope){
 		return result;
 	}
 	// disable typing in anything a g c t, shift, arrowLeft, arrowRight, Backspace
-	$scope.disable=function(index, event){
+	$scope.disable=function(event){
 		// allow for (Ctrl|Meta) c,v,z copy, paste, undo
 		// for saving
 		if((event.ctrlKey==true||event.metaKey==true)&&event.key=="s"){
-			$scope.saveProgress(index);
+			$scope.saveProgress();
 			return;
 		}
 		if((event.ctrlKey==true||event.metaKey==true)){
@@ -96,6 +111,7 @@ app.controller('myEditor',function($scope){
 			event.preventDefault();
 			return;
 		}
+
 	}
 
 	// sets cursor
@@ -139,6 +155,9 @@ app.controller('myEditor',function($scope){
 		$scope.textbuffer = newText;
 		$scope.sections = returnList($scope.textbuffer, $scope.buffer, $scope.bucket);
 	},
+	$scope.editSingleRow = function(event){
+		// $scope.textbuffer= $scope.textbuffer.toUpperCase();
+	},
 	$scope.editRow=function(index, event){
 		// console.log("firstrow", event.key);
 		$scope.editing = 0;
@@ -178,6 +197,7 @@ app.controller('myEditor',function($scope){
 		$scope.display = style;
 		// back to double strand
 		if(style=="default"){
+			$scope.textbuffer = $scope.textbuffer.toUpperCase();
 			$scope.sections =returnList($scope.textbuffer, $scope.buffer, $scope.bucket);
 		}
 

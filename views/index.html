@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <link rel="stylesheet" href="style/test.css">
-        <link rel="stylesheet" href="style/slider.css">
+        <link rel="stylesheet" href="style/editor.css">
         <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
         <script src='javascript/angularplasmid.min.js'></script>
         
@@ -22,14 +21,17 @@
               <input type="radio" name="editor" ng-click="switchDisplay('single')">
             </label>
 
-            
-            Line Number:
-            
-            <label class="container">On
-              <input type="radio" checked="checked" name="linenumber" ng-click="switchLine()">
-            </label>
-            <label class="container">Off
-              <input type="radio" name="linenumber" ng-click="switchLine()">
+            <span ng-show="display=='default'">
+                Line Number:
+                
+                <label class="container">On
+                  <input type="radio" checked="checked" name="linenumber" ng-click="switchLine('on')">
+                </label>
+                <label class="container">Off
+                  <input type="radio" name="linenumber" ng-click="switchLine('off')">
+                </label>
+
+            </span>
 
             <button id="saveButton" class="savedButton" ng-click="saveProgress()"><i class="far fa-save"></i></button>
             <div  ng-show="display=='default'">
@@ -43,15 +45,16 @@
                                     </div>
                                 </div>
 
-                                <input id="{{$index}}" spellcheck="false" ng-click="startEditing($index, $event)" ng-blur="saveToBuffer($index, row1)" ng-keydown="disable($index, $event)" class="input" ng-model="row[0]" contenteditable ng-keyup="editRow($index, $event)">
-                                <input id="{{$index}}row2"  ng-click="startEditing($index, $event)" ng-blur="saveToBuffer($index, row2)" ng-model="row[1]" ng-keydown="disable($index, $event)" class="input" contenteditable ng-keyup="editSecondRow($index, $event)">
+                                <input id="{{$index}}" spellcheck="false" ng-click="startEditing($event)" ng-blur="saveToBuffer($index, row1)" ng-keydown="disable($event)" class="input" ng-model="row[0]" contenteditable ng-keyup="editRow($index, $event)">
+                                <input id="{{$index}}row2" spellcheck="false" ng-click="startEditing($event)" ng-blur="saveToBuffer($index, row2)" ng-model="row[1]" ng-keydown="disable($event)" class="input" contenteditable ng-keyup="editSecondRow($index, $event)">
                             </div>
                         </p>
                     </div>
                 </div>
             </div>
             <div ng-show="display=='single'">
-                <textarea ng-model="textbuffer" class="single">
+                <textarea id="singleEditor" ng-model="textbuffer" ng-click="startEditingSingle($event)"   spellcheck="false" ng-keydown="disable($event)" ng-keyup="editSingleRow($event)" ng-blur="stopEditingSingle($event)" class="single saved">
+
                 </textarea>
             </div>
         </div>
