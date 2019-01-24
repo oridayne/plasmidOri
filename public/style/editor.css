@@ -11,12 +11,7 @@
 	/*outline: 1px solid red;*/
 
 }
-.indiceItem{
-	/*outline: 1px solid blue;*/
-	width: 142px;
-	font-size: 16px;
-	font-family: "Courier New", Courier, monospace;
-}
+
 
 .rowwrapper{
 	display:flex;
@@ -59,7 +54,7 @@
 }
 
 #singleEditor{
-	text-transform:uppercase;
+/*	text-transform:uppercase;
 	letter-spacing: 0.5px;
 	font-size: 16px;
 	font-family: "Courier New", Courier, monospace;
@@ -69,6 +64,18 @@
 	border:none;
 	resize: none;
 	/*outline: 1px solid silver;*/
+}
+
+.single{
+	text-transform:uppercase;
+	letter-spacing: 0.5px;
+	font-size: 16px;
+	font-family: "Courier New", Courier, monospace;
+	width: 700px;
+	height: 500px;	
+	line-height:25px;
+	border:none;
+	resize: none;
 }
 
 
@@ -99,13 +106,54 @@
     color: white;
 }
 
+#copyButton{
+	border: 1px solid silver;
+	text-align: center;
+	text-decoration: none;
+	display: inline-block;
+	font-size: 20px;
+	border-radius: 3px;
+}
+
+#copyButton:focus{
+	outline:none;
+}
+
+#copyButton:active {
+	background-color: #4CAF50;
+    color: white;
+}
+
+.testing{
+	width: 800px;
+	outline: 1px solid green;
+}
+
+.indiceItem{
+	/*outline: 1px solid blue;*/
+	/*margin-right: 1px;*/
+	width: 141px;
+	font-size: 16px;
+	letter-spacing: 0.5px;
+	padding-right: 0px;
+	font-family: "Courier New", Courier, monospace;
+	/*word-spacing: 30px;*/
+	/*letter-spacing: 0.5px;*/
+}
+
 .input{
 	width:800px;
 	text-transform:uppercase;
 	outline: none;
 	border: 0;
+	/*word-spacing: 2em;
+	letter-spacing: 1px;*/
+	
+
 	word-spacing: 30px;
 	letter-spacing: 0.5px;
+
+
 	font-size: 16px;
 	font-family: "Courier New", Courier, monospace;
 

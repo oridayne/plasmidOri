@@ -10,8 +10,8 @@ var converter = {"A":"T", "T":"A", "G":"C", "C":"G", " ":" "};
 
 // TODO:
 // - move cursor to end upon enter 
-// disable bad characters for single line
-// fix saving and stuff for single line
+// - do copy button
+
 
 app.controller('myEditor',function($scope){
 
@@ -33,14 +33,26 @@ app.controller('myEditor',function($scope){
 	// which strand we are currently editing, 0 or 1, first or second in a row 
 	$scope.editing = 0;
 	$scope.lineDisplay = true;
+
+	$scope.testIndices = [];
 	$scope.switchLine = function(style){
 		if(style=="on"){
-			$scope.lineDisplay=false;
-		}
-		else{
 			$scope.lineDisplay=true;
 		}
+		else{
+			$scope.lineDisplay=false;
+		}
 
+	}
+
+
+	$scope.setIndices = function(seqLen){
+		for(x=0;x<seqLen;x+buffer){
+			for(y=0;y<bucket;y++){
+				
+			}
+
+		}
 	}
 	// for every newly rendered row in the editor, set the cursor to the end
 	// also executed when user creates new row by entering in base pairs
@@ -54,7 +66,7 @@ app.controller('myEditor',function($scope){
     	let children = angular.element((document.getElementById("dnaWrapper").children));
     	console.log(children[index]);
 		let inputTarget = children[index].children[1].children[$scope.editing]; 
-		console.log(inputTarget, inputTarget.value);
+		// console.log(inputTarget, inputTarget.value);
 		console.log($scope.sections[index][$scope.editing]);
 		inputTarget.value =$scope.sections[index][$scope.editing];
 		$scope.setSelectionRange(inputTarget, inputTarget.value.length,inputTarget.value.length);
@@ -93,6 +105,45 @@ app.controller('myEditor',function($scope){
 		}
 		$scope.sections = result;
 		return result;
+	}
+
+	$scope.genSpace = function(num){
+		let spaces = "";
+		for(x=0;x<num;x++){
+			spaces+=" ";
+		}
+		return spaces;
+	}
+	$scope.copyDNA = function(){
+		const el = document.createElement('textarea');
+		el.className = "single"; 
+		let val = "";
+		let indices = [];
+		let subIndices = [];
+		let subIndex;
+		for(index=0;index<$scope.sections.length;index++){
+			subIndices = "";
+			for(subIndex=0;subIndex<$scope.buffer;subIndex+=$scope.bucket){
+				let label = (index*$scope.buffer)+subIndex;
+				// filler space
+				let numSpaces = $scope.genSpace(11- String(label).length); 
+				subIndices+=label+numSpaces;
+			}
+			indices.push(subIndices);
+		}
+		for(x=0;x<$scope.sections.length;x++){
+			val+=indices[x]+"\n";
+			val+=$scope.sections[x][0];
+			val+="\n";
+			val+=$scope.sections[x][1];
+			val+="\n\n";
+		}
+		el.value =val;
+		document.body.appendChild(el);
+		el.select();
+		document.execCommand('copy');
+		document.body.removeChild(el);
+
 	}
 	// disable typing in anything a g c t, shift, arrowLeft, arrowRight, Backspace
 	$scope.disable=function(event){
@@ -212,6 +263,7 @@ function generateIndices(buffer, bucket){
 	}
 	return result;
 }
+
 
 
 

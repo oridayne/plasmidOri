@@ -34,14 +34,15 @@
             </span>
 
             <button id="saveButton" class="savedButton" ng-click="saveProgress()"><i class="far fa-save"></i></button>
+            <button id="copyButton" ng-click="copyDNA()"> <i class="fas fa-copy"></i></button>
             <div  ng-show="display=='default'">
                 <div id="dnaWrapper" class="saved">
                     <div ng-repeat="row in sections  track by $index"  ng-init="$last && finished()">
                         <p>
-                            <div  class="rowwrapper">
-                                <div class="indiceWrapper" ng-show="lineDisplay"> 
+                            <div id="rowWrapper{{$index}}" class="rowwrapper">
+                                <div class="indiceWrapper" ng-show="lineDisplay">   
                                     <div  ng-repeat="indice in rowIndices">
-                                       <div class="indiceItem">{{$parent.$index*buffer+indice}}   </div>
+                                       <div class="indiceItem">{{$parent.$index*buffer+indice}}</div>
                                     </div>
                                 </div>
 
