@@ -37,9 +37,9 @@
             <button id="copyButton" ng-click="copyDNA()"> <i class="fas fa-copy"></i></button>
             <div  ng-show="display=='default'">
                 <div id="dnaWrapper" class="saved">
-                    <div ng-repeat="row in sections  track by $index"  ng-init="$last && finished()">
+                    <div ng-repeat="row in sections  track by $index"  id="rowWrapper{{$index}}"  ng-init="$last && finished()">
                         <p>
-                            <div id="rowWrapper{{$index}}" class="rowwrapper">
+                            <div class="rowwrapper">
                                 <div class="indiceWrapper" ng-show="lineDisplay">   
                                     <div  ng-repeat="indice in rowIndices">
                                        <div class="indiceItem">{{$parent.$index*buffer+indice}}</div>

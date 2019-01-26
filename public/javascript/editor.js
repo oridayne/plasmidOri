@@ -64,12 +64,16 @@ app.controller('myEditor',function($scope){
     	console.log("in finished!", index);
 
     	let children = angular.element((document.getElementById("dnaWrapper").children));
-    	console.log(children[index]);
-		let inputTarget = children[index].children[1].children[$scope.editing]; 
+    	console.log(children, "child", children[index]);
+		let inputTarget = children[index].children[1].children[1+$scope.editing]; 
+
 		// console.log(inputTarget, inputTarget.value);
-		console.log($scope.sections[index][$scope.editing]);
 		inputTarget.value =$scope.sections[index][$scope.editing];
+		console.log(inputTarget, inputTarget.value.length);
+
+		// $scope.setSelectionRange(inputTarget, inputTarget.value.length,inputTarget.value.length);
 		$scope.setSelectionRange(inputTarget, inputTarget.value.length,inputTarget.value.length);
+
     };
 
     $scope.startEditing = function(event){
@@ -296,6 +300,5 @@ function returnList(text, buffer, bucket){
 		let fiveThree=getCompStrand(threeFive);		
 		result.push([threeFive,  fiveThree]);
 	}
-	console.log(result);
 	return result;
 }
