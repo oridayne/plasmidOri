@@ -135,6 +135,7 @@ var base = arcGroup.append("path")
       dragend=false;
       stack = [];
       reverse = false;
+
       // show highlighted dna on end
       scope.$apply(function(){
         let newStart = Math.min(scope.start,scope.end);
