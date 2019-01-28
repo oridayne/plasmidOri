@@ -15,7 +15,7 @@ var converter = {"A":"T", "T":"A", "G":"C", "C":"G", " ":" "};
 
 app.controller('myEditor',function($scope){
 
-	$scope.text="AACTGTATGCGGAAAAGGAGGCCAGTGCATCAGAGAGTCGCAAACAGCTGTGAAGTCGCGTTCTCAAGAATTTGCAGCAGGCTGTGGCCACTTCGCCGGAAAAGGAGGCCAGTGCATCAGAGAGCAAGATCACAGCTGTGAAGTCGCTTC";
+	$scope.text="AACTGTATGCGGAAAAGGAGGCCAGTGCATCAGA";
 	$scope.textbuffer = $scope.text;
 	// dna base pairs per line
 	$scope.editStart = 0;
@@ -26,8 +26,9 @@ app.controller('myEditor',function($scope){
 	$scope.rowIndices = generateIndices(50, 10);
 	// allowance for spacing
 	$scope.bufferspace = $scope.buffer/$scope.bucket-1;
-
-	$scope.sections =returnList($scope.text, $scope.buffer, $scope.bucket);
+	
+	console.log(scope1.seq);
+	$scope.sections =returnList(scope1.seq, $scope.buffer, $scope.bucket);
 	$scope.display = "default";
 	$scope.newRow = true;
 	// which strand we are currently editing, 0 or 1, first or second in a row 
