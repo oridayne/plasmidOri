@@ -1,4 +1,4 @@
-var app = angular.module('textApp', []);
+// var editorApp = angular.module('textApp', []);
 
 var acceptedLetters = {"a":true, "g":true, "c":true, "t":true, "A":true, "G":true, "C":true, "T":true, " ":true};
 // DENG: maybe, test on windows for control?
@@ -15,7 +15,7 @@ var converter = {"A":"T", "T":"A", "G":"C", "C":"G", " ":" "};
 
 app.controller('myEditor',function($scope){
 
-	$scope.text="AATGCGTATGCGATGATGCGTTCTACTATCTCTCGCGTACCGATGATGCGTTCTACTATCTTCGAT";
+	$scope.text="AACTGTATGCGGAAAAGGAGGCCAGTGCATCAGAGAGTCGCAAACAGCTGTGAAGTCGCGTTCTCAAGAATTTGCAGCAGGCTGTGGCCACTTCGCCGGAAAAGGAGGCCAGTGCATCAGAGAGCAAGATCACAGCTGTGAAGTCGCTTC";
 	$scope.textbuffer = $scope.text;
 	// dna base pairs per line
 	$scope.editStart = 0;
