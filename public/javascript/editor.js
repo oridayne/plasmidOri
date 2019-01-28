@@ -14,9 +14,9 @@ var converter = {"A":"T", "T":"A", "G":"C", "C":"G", " ":" "};
 
 
 app.controller('myEditor',function($scope){
-
+	let DNA = angular.element($("#divider")).scope().seq;
 	$scope.text="AACTGTATGCGGAAAAGGAGGCCAGTGCATCAGA";
-	$scope.textbuffer = $scope.text;
+	$scope.textbuffer = DNA;
 	// dna base pairs per line
 	$scope.editStart = 0;
 	$scope.buffer = 50;
@@ -27,8 +27,8 @@ app.controller('myEditor',function($scope){
 	// allowance for spacing
 	$scope.bufferspace = $scope.buffer/$scope.bucket-1;
 	
-	console.log(scope1.seq);
-	$scope.sections =returnList(scope1.seq, $scope.buffer, $scope.bucket);
+	console.log(DNA);
+	$scope.sections =returnList(DNA, $scope.buffer, $scope.bucket);
 	$scope.display = "default";
 	$scope.newRow = true;
 	// which strand we are currently editing, 0 or 1, first or second in a row 
@@ -45,16 +45,6 @@ app.controller('myEditor',function($scope){
 		}
 
 	}
-
-
-	$scope.setIndices = function(seqLen){
-		for(x=0;x<seqLen;x+buffer){
-			for(y=0;y<bucket;y++){
-				
-			}
-
-		}
-	}
 	// for every newly rendered row in the editor, set the cursor to the end
 	// also executed when user creates new row by entering in base pairs
 	$scope.finished = function() {
@@ -62,16 +52,11 @@ app.controller('myEditor',function($scope){
 			return;
 		}
     	let index = $scope.sections.length-1;
-    	console.log("in finished!", index);
-
     	let children = angular.element((document.getElementById("dnaWrapper").children));
-    	console.log(children, "child", children[index]);
 		let inputTarget = children[index].children[1].children[1+$scope.editing]; 
 
 		// console.log(inputTarget, inputTarget.value);
 		inputTarget.value =$scope.sections[index][$scope.editing];
-		console.log(inputTarget, inputTarget.value.length);
-
 		// $scope.setSelectionRange(inputTarget, inputTarget.value.length,inputTarget.value.length);
 		$scope.setSelectionRange(inputTarget, inputTarget.value.length,inputTarget.value.length);
 
@@ -105,8 +90,9 @@ app.controller('myEditor',function($scope){
     }
 	$scope.returnList = function(){
 		let result = [];
-		for(x=0;x<$scope.text.length;x+=$scope.buffer){
-			result.push($scope.text.substring(x,x+$scope.buffer));
+		let text =  angular.element($("#divider")).scope().seq;
+		for(x=0;x<text.length;x+=$scope.buffer){
+			result.push(text.substring(x,x+$scope.buffer));
 		}
 		$scope.sections = result;
 		return result;
@@ -184,16 +170,21 @@ app.controller('myEditor',function($scope){
 	      range.select();
 	    }
 	};
+
 	// save all current progress permanently
 	$scope.saveProgress = function(){
-
+		console.log("save progress!")
 		document.getElementById("dnaWrapper").className = "saved";
 		document.getElementById("saveButton").className = "savedButton";
+		let scope = angular.element($("#divider")).scope();
 		$scope.text = $scope.textbuffer;
+		scope.seq = $scope.textbuffer;
+		scope.orfsFunc();
 	}
 
 	// on a row blue, save to temporary buffer
 	$scope.saveToBuffer = function(index, row){
+		console.log("save to buffer called!", index, row);
 		let rowSize = $scope.buffer;
 		let elt=false;
 		let newVal = "";
@@ -210,6 +201,7 @@ app.controller('myEditor',function($scope){
 		let newText = $scope.textbuffer.substring(0,index*rowSize)+newVal+$scope.textbuffer.substring((index*rowSize)+rowSize);
 		$scope.textbuffer = newText;
 		$scope.sections = returnList($scope.textbuffer, $scope.buffer, $scope.bucket);
+
 	},
 	$scope.editSingleRow = function(event){
 		// $scope.textbuffer= $scope.textbuffer.toUpperCase();

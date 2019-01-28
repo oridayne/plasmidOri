@@ -102,10 +102,8 @@ var app = angular.module('myApp', ['angularplasmid']);
           $scope.title=title+x1+"-"+x2;
           $scope.view = getNewSeqIn(x1,x2);
         };
-        $scope.orfsFunc = function(){$scope.orfsdata=findAllORF($scope.seq, $scope.minLength);};
+        $scope.orfsFunc = function(){console.log("I was called!");$scope.orfsdata=findAllORF($scope.seq, $scope.minLength);};
         $scope.orfsdata = findAllORF($scope.seq, $scope.minLength);
-        // $scope.orfsdata = [[0,10],[30,20]];
-
         $scope.editAnnotation = function(){editAnnotation()};
         $scope.submitAnnotation = function(){submitAnnotation();};
         $scope.deleteSequence = function(){deleteSequence();};
