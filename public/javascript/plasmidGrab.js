@@ -132,16 +132,22 @@ var base = arcGroup.append("path")
     })
     .on('dragend', function(){
       var scope = angular.element($("#divider")).scope();
+      let newStart = Math.min(scope.start,scope.end);
+      let newEnd = Math.max(scope.start,scope.end);
+      let newSequence = getNewSeqIn(newStart,newEnd);
+    
+      var scope2 = angular.element($("#editorModule")).scope();
+      scope2.setEditor(start,end,newSequence);
       dragend=false;
       stack = [];
       reverse = false;
+      
 
       // show highlighted dna on end
       scope.$apply(function(){
-        let newStart = Math.min(scope.start,scope.end);
-        let newEnd = Math.max(scope.start,scope.end);
+     
         scope.title="Sample Frame "+ newStart+"-"+newEnd;
-        scope.view = getNewSeqIn(newStart,newEnd);
+        scope.view = newSequence;
         deactivateTitle();
         scope.selected="viewer";
         document.getElementById("viewer").classList.add("active");

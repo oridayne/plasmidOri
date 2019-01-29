@@ -26,7 +26,7 @@
                                             <div class="rowwrapper">
                                                 <div class="indiceWrapper" ng-show="lineDisplay">   
                                                     <div  ng-repeat="indice in rowIndices">
-                                                       <div class="indiceItem">{{$parent.$index*buffer+indice}}</div>
+                                                       <div class="indiceItem">{{$parent.$index*buffer+indice+offsetStart}}</div>
                                                     </div>
                                                 </div>
 

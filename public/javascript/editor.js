@@ -21,6 +21,8 @@ app.controller('myEditor',function($scope){
 	$scope.bucket = 10;
 	$scope.row1 = 0;
 	$scope.row2 = 1;
+	$scope.offsetStart = 0;
+	$scope.offsetEnd = 0;
 	$scope.rowIndices = generateIndices(50, 10);
 	// allowance for spacing
 	$scope.sections =returnList(DNA, $scope.buffer, $scope.bucket);
@@ -29,6 +31,12 @@ app.controller('myEditor',function($scope){
 	// which strand we are currently editing, 0 or 1, first or second in a row 
 	$scope.editing = 0;
 	$scope.lineDisplay = true;
+	$scope.setEditor = function(start, end, text){
+		$scope.offsetStart = start;
+		$scope.offsetEnd = end;
+		$scope.textbuffer = text;
+		$scope.sections = returnList(text, $scope.buffer, $scope.bucket);
+	}
 	$scope.switchLine = function(style){
 		$scope.lineDisplay=(style=="on");
 	}
@@ -131,6 +139,9 @@ app.controller('myEditor',function($scope){
 		document.getElementById("dnaWrapper").className = "saved";
 		document.getElementById("saveButton").className = "savedButton";
 		let scope = angular.element($("#divider")).scope();
+		if($scope.offsetStart == 0){
+
+		}
 		$scope.text = $scope.textbuffer;
 		scope.seq = $scope.textbuffer;
 		scope.orfsFunc();

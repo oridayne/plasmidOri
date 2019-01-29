@@ -68,10 +68,9 @@
                 <div id="content">
 
                     <!-- content for dna editing -->
-                     <div ng-show="selected=='dna'" id="controlDNA" >
+                     <div ng-show="selected=='dna'||selected=='viewer'" id="controlDNA" >
                         <!-- <textarea ng-model="seq" ng-keyup='orfsFunc($event)' id="sequence"></textarea>      -->
-                    <div ng-include="'javascript/editor2.html'"></div>
-
+                        <div ng-include="'javascript/editor2.html'"></div>
 
                     </div>
 
@@ -91,10 +90,10 @@
                     <!-- content for viewing fragments (highlight) -->
                     <div ng-show="selected=='viewer'">
                         <div id="scroll">
-                            <input type="number" class="viewControl" ng-model="start" >
-                            <input type="number" class="viewControl" ng-model="end">
+                            <!-- <input type="number" class="viewControl" ng-model="start" > -->
+                            <!-- <input type="number" class="viewControl" ng-model="end"> -->
                         </div>
-                        <p data-ng-bind="title"></p>
+                        <!-- <p data-ng-bind="title"></p> -->
                         <div class="view" ng-click="editSequence($event)" ng-keydown="submitSequence(start,end,$event)" id="sampleeditor" data-ng-bind="view" contenteditable></div> 
                         <button ng-click="annotate(start, end);">Annotate</button>
                     </div>

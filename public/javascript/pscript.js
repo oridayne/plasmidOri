@@ -79,7 +79,14 @@ var app = angular.module('myApp', ['angularplasmid']);
           $scope.setAnnotatePoints(start, end, 'Annotated Frame');
         };
         // reset highlighter
-        $scope.reset = function(){$scope.start = 0;$scope.end = 0; $scope.toggle("dna"); $scope.title="";};
+        $scope.reset = function(){
+          $scope.start = 0;
+          $scope.end = 0; 
+          $scope.toggle("dna"); 
+          $scope.title="";
+          let scope2 = angular.element($("#editorModule")).scope();
+          scope2.setEditor(0,0,$scope.seq);
+        };
         $scope.resetView = function(){$scope.view="";};
         $scope.resetSearch = function(){$scope.selectedEnd = false;$scope.selectedStart = false;};
         // removes the marker for the annotation, doesn't alter the sequence
@@ -140,9 +147,13 @@ function toggle(newSelected){
   }
   if(newSelected=="dna"){
     document.getElementById("dna").classList.add("active");
+    let scope2 = angular.element($("#editorModule")).scope();
+    scope2.setEditor(0,0,ann.seq);
   }
   if(newSelected=="viewer"||newSelected=="annotate"){
     document.getElementById("viewer").classList.add("active");
+    let scope2 = angular.element($("#editorModule")).scope();
+    scope2.setEditor(ann.start,ann.end,ann.seq.substring(ann.start,ann.end));
   }
 }
 
