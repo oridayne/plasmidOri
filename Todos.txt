@@ -1,8 +1,12 @@
 TODOS:
 - better UI for search list 
 - test cases
-- fix submit/edit for neg or postive start and end cases
 - ATG end case handling
 - other stop/start codons
-- double line text
 - amino acid conversion
+- move cursor to end upon enter 
+- optimated toggle between full and partial editor
+- disallow editing for annotation
+- error handling for bad blast cases - job still pending, etc
+- lag issues when getting blast results
+- put back in controller for highligher

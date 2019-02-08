@@ -1,6 +1,5 @@
-let defaultlen = 100;
+
 let testStr = "";
-let compStr = "";
 const startCodon = "ATG";
 const stopCodon = "ATT";
 
@@ -11,11 +10,8 @@ var app = angular.module('myApp', ['angularplasmid']);
     app.controller('myCtrl', function($scope, $compile, $element, $templateCache) {
         $scope.myRad= 200;
         $scope.seq = testStr;
-        $scope.comp = compStr;
         $scope.search = "";
         $scope.selected = "dna";
-        $scope.title="Viewer";
-        $scope.view = "";
 
         // search endpoints
         $scope.selectedStart = 0;
@@ -43,19 +39,15 @@ var app = angular.module('myApp', ['angularplasmid']);
           $scope.searchResults = [];
           $scope.selectedStart=false;
           $scope.selectedEnd=false;
-          $scope.view="";
-          $scope.title="Viewer";
         }
 
         $scope.viewSearch = function(start,end){
           $scope.toggle('search');
-          // $scope.showDNA('Sample Frame ', start, end); 
           $scope.setSearchPoints(start, end); 
           let editorScope = angular.element($("#editorModule")).scope();
           editorScope.setEditor(start,end,$scope.seq.substring(start,end));
         }
         $scope.searchDNA = function(){
-          $scope.title="";
           $scope.searchResults = [];
           if($scope.search==""){return;}
           let index = $scope.seq.indexOf($scope.search, 0);
@@ -67,6 +59,8 @@ var app = angular.module('myApp', ['angularplasmid']);
           $scope.end = 0;
 
         };
+
+        // annotats a selected region
         $scope.annotate = function(start,end){
           // don't bother
           if(start==end){
@@ -76,16 +70,16 @@ var app = angular.module('myApp', ['angularplasmid']);
             start+=$scope.seq.length;
             end+=$scope.seq.length;
           }
+          // helper function, handles all the computation, returns true if annotated correctly, false if it did not
           let result = annotate(Math.min(start,end), Math.max(start,end));
           $scope.start=0;
           $scope.end=0;
 
           if(!result){return;}
-          $scope.showDNA('Annotated Frame ', start, end); 
           $scope.toggle('annotate'); 
           $scope.setAnnotatePoints(start, end, 'Annotated Frame');
-          let scope2 = angular.element($("#editorModule")).scope();
-          scope2.setEditor(start,end,$scope.seq.substring(start,end));
+          let editorScope = angular.element($("#editorModule")).scope();
+          editorScope.setEditor(start,end,$scope.seq.substring(start,end));
 
 
         };
@@ -94,23 +88,21 @@ var app = angular.module('myApp', ['angularplasmid']);
           $scope.start = 0;
           $scope.end = 0; 
           $scope.toggle("dna"); 
-          $scope.title="";
-          let scope2 = angular.element($("#editorModule")).scope();
-          scope2.setEditor(0,$scope.seq.length,$scope.seq);
+          let editorScope = angular.element($("#editorModule")).scope();
+          editorScope.setEditor(0,$scope.seq.length,$scope.seq);
         };
-        $scope.resetView = function(){$scope.view="";};
+        // resets the search params
         $scope.resetSearch = function(){$scope.selectedEnd = false;$scope.selectedStart = false;};
+        // changes editor according to annotation
         $scope.focusAnnotation = function(start,end){
-          let scope2 = angular.element($("#editorModule")).scope();
-          scope2.setEditor(start,end,$scope.seq.substring(start,end));
+          let editorScope = angular.element($("#editorModule")).scope();
+          editorScope.setEditor(start,end,$scope.seq.substring(start,end));
         }
         // removes the marker for the annotation, doesn't alter the sequence
         $scope.removeAnnotation = function(start,end){
           for(x=0;x<$scope.annotations.length;x++){
             if($scope.annotations[x].start ==start&&$scope.annotations[x].end==end){
-              $scope.view="";
               $scope.selected="viewer";
-              $scope.title="Viewer";
               $scope.annotations.splice(x,1);
               return;
             }
@@ -120,11 +112,7 @@ var app = angular.module('myApp', ['angularplasmid']);
         $scope.deleteAnnotation = function(start, end){
           deleteAnnotation(start,end);
         };
-        $scope.showDNA = function(title, x1, x2){
-          $scope.title=title+x1+"-"+x2;
-          $scope.view = getNewSeqIn(x1,x2);
-        };
-        $scope.orfsFunc = function(){console.log("I was called!");$scope.orfsdata=findAllORF($scope.seq, $scope.minLength);};
+        $scope.orfsFunc = function(){$scope.orfsdata=findAllORF($scope.seq, $scope.minLength);};
         $scope.orfsdata = findAllORF($scope.seq, $scope.minLength);
         $scope.editAnnotation = function(){editAnnotation()};
         $scope.submitAnnotation = function(){submitAnnotation();};
@@ -133,8 +121,6 @@ var app = angular.module('myApp', ['angularplasmid']);
         $scope.editKeys = function(e){editKeys(e)};
         $scope.editOrfMinLength = function(e){editOrfMinLength(e)};
         $scope.editInterval = function(e){editInterval(e)};
-        $scope.editSequence = function(){editSequence();};
-        $scope.submitSequence = function(start,end,e){submitSequence(Math.min(start,end),Math.max(start,end),e)};
         $scope.viewORF = function(start,end){
           let scope2 = angular.element($("#editorModule")).scope();
           scope2.setEditor(start,end+2,$scope.seq.substring(start,end+2));
@@ -144,8 +130,7 @@ var app = angular.module('myApp', ['angularplasmid']);
         $scope.blastMatch = [10,50];
         // $scope.hspList = [{"bitscore":300, "score":300, "expect": "test", "identities":150, "align":150, "gaps":0}];
         $scope.setBlast = function(start,end){
-          console.log("setting blast!!", start, end);
-          $scope.blastMatch = [start-1,end-1];
+          $scope.blastMatch = [Math.min(start-1,end-1),Math.max(start-1,end-1)];
         }
         $scope.hspList =  getHSPList();
 

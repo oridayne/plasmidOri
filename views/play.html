@@ -14,6 +14,8 @@
         <script src="javascript/plasmidGrab.js" type="text/javascript"></script>
         <link rel="stylesheet" href="style/editor.css">
         <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+        <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css"> -->
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
 
 
 
@@ -31,22 +33,22 @@
                         <trackscale  id="innerticks" class='smajor' interval='{{interval}}' showlabels='1' labelclass='sml'></trackscale>
 
                         <!-- user annotations       -->
-                        <trackmarker class="highlight" ng-repeat='n in annotations' start='{{n.start}}' end='{{n.end}}' ng-click="showDNA('Annotated Frame ', n.start, n.end); toggle('annotate'); setAnnotatePoints(n.start, n.end, n.name); focusAnnotation(n.start,n.end);"  ></trackmarker>
+                        <trackmarker class="highlight" ng-repeat='n in annotations' start='{{n.start}}' end='{{n.end}}' ng-click="toggle('annotate'); setAnnotatePoints(n.start, n.end, n.name); focusAnnotation(n.start,n.end);"  ></trackmarker>
                         
                         <!-- search results -->
                         <trackmarker   markerclass="markerhover" markerstyle="fill:rgba(128,0,0,0.2)" ng-repeat='n in searchResults' start='{{n.start}}' end='{{n.end}}' vadjust="25"  ng-click="viewSearch(n.start,n.end) "></trackmarker>
 
                         <!-- ORFS -->
-                        <trackmarker ng-repeat='n in orfsdata' markerclass="orfhover" ng-click=" showDNA('Open Reading Frame ', start, end+2);  viewORF(n[0],n[1]); toggle('orf');"  start="{{n[0]}}" end="{{n[1]}}"  vadjust="-20" wadjust="-23" arrowstartlength="0.8" arrowstartwidth="10" arrowendlength="5" arrowendwidth="3"></trackmarker>
+                        <trackmarker ng-repeat='n in orfsdata' markerclass="orfhover" ng-click="viewORF(n[0],n[1]); toggle('orf');"  start="{{n[0]}}" end="{{n[1]}}"  vadjust="-20" wadjust="-23" arrowstartlength="0.8" arrowstartwidth="10" arrowendlength="5" arrowendwidth="3"></trackmarker>
                         
                         <!-- blast matches -->
                         <trackmarker markerclass="blastmarker"  start="{{blastMatch[0]}}" end="{{blastMatch[1]}}"  vadjust="-5" wadjust="-23" ></trackmarker>
 
                         <!-- drawing arc forward -->
-                        <trackmarker markerclass="markerhover" ng-if="ed!=false && start<end" start="{{start}}" end="{{end}}" ng-click="showDNA('Sample Frame ',start, end); toggle('viewer')" ng-dblclick="reset(); resetView();" vadjust="25" markerstyle="fill:rgba(0,128,0,0.2)" wadjust=""></trackmarker>
+                        <trackmarker markerclass="markerhover" ng-if="ed!=false && start<end" start="{{start}}" end="{{end}}" ng-click="toggle('viewer')" ng-dblclick="reset();" vadjust="25" markerstyle="fill:rgba(0,128,0,0.2)" wadjust=""></trackmarker>
 
                         <!-- drawing arc backward -->
-                        <trackmarker markerclass="markerhover"  ng-click="showDNA('Sample Frame ',end, start); toggle('viewer')" ng-dblclick="reset()" ng-if="ed!=false && start>end" start="{{end}}" end="{{start}}"  vadjust="25" markerstyle="fill:rgba(0,128,0,0.2)" wadjust=""></trackmarker>
+                        <trackmarker markerclass="markerhover"  ng-click="toggle('viewer')" ng-dblclick="reset()" ng-if="ed!=false && start>end" start="{{end}}" end="{{start}}"  vadjust="25" markerstyle="fill:rgba(0,128,0,0.2)" wadjust=""></trackmarker>
 
                     </plasmidtrack>
                 </plasmid>
@@ -80,9 +82,9 @@
                         <button class="btn" ng-click="removeAnnotation(annotateStart, annotateEnd)">Remove Annotation</button>
                         <button class="btn" ng-click="removeAnnotation(annotateStart, annotateEnd);deleteAnnotation(annotateStart, annotateEnd); orfsFunc();">Delete Sequence</button>
                     </div>
-                     <textarea type="text" placeholder="Search.." id="search" ng-model="search"></textarea>
+                     <textarea type="text" placeholder="Search.." id="searchDNA" ng-model="search"></textarea>
                         <button ng-click="searchDNA();" id="searchbutton">Go!</button><button ng-click="clear()">Clear</button>
-                       <div ng-include="'javascript/editor2.html'"></div>
+                       <div ng-include="'javascript/editor.html'"></div>
                        <button ng-show="selected=='viewer'" id="annotateButton" ng-click="annotate(start, end);">Annotate</button>
                     </div>
 
@@ -95,11 +97,12 @@
                                 <div ng-repeat="x in hspList" class="blastHSP" ng-click="setBlast(x.hfrom, x.hto)">
                                     <!-- header -->
                                     <div>
+                                        <strong>Range {{x.num}}: {{x.hfrom}} to {{x.hto}}</strong>
+                                        <br>
                                         Score = {{x["bitscore"]}} bits ({{x.score}}), Expect={{x.expect}}<br>
                                         Identities={{x.identities}}/{{x.align}} ({{((x.identities/x.align)*100).toFixed(0)}}%), Gaps = {{x.gaps}}/{{x.align}} ({{((x.gaps/x.align)*100).toFixed(0)}}%)
                                     </div>
-  <!-- left indice -->
-
+                                    <!-- left indice -->
                                     <div class="blastStyle">
                                         <div class="blastIndex">
                                             <div ng-repeat="indice in x.leftIndices">

@@ -125,9 +125,8 @@ app.controller('myEditor',function($scope){
 	$scope.disable=function(event){
 		// allow for (Ctrl|Meta) c,v,z copy, paste, undo
 		// for saving
-
 		//disallow enter for single editor
-		if($scope.display=="single"&&event.key=="Enter"){
+		if($scope.display=="single"&&event.key=="Enter"||$scope.display=="single"&&event.key==" "){
 			event.preventDefault();
 			return;
 		}

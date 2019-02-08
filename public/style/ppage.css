@@ -11,7 +11,7 @@
 	outline: 1px solid silver;
 	height: 98vh;
 }
-#search{
+#searchDNA{
 	width: var(--canvas-modified);
 	/*max-width: var(--canvas-modified);*/
 	/*min-width: var(--canvas-modified);*/
@@ -205,6 +205,7 @@
 
 
 .blastHSP{
+	padding-left: 5px;
 	font-size: 14px;
 	font-family: "Courier New", Courier, monospace;
 	outline: 1px solid silver;
