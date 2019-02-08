@@ -5,6 +5,8 @@
 	outline: 1px solid black;
 
 }
+#editorModule{
+}
 
 .indiceWrapper{
 	display:flex;
@@ -39,8 +41,9 @@
 	margin:auto;
 	width: 98%;
 	height: 100%;
-	outline: 1px solid orange;
+	/*outline: 1px solid orange;*/
 	max-height: inherit;
+	margin-bottom: 5px;
 }
 
 .unsaved{

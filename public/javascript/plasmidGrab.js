@@ -137,7 +137,7 @@ var base = arcGroup.append("path")
       let newSequence = getNewSeqIn(newStart,newEnd);
     
       var scope2 = angular.element($("#editorModule")).scope();
-      scope2.setEditor(start,end,newSequence);
+      scope2.setEditor(scope.start,scope.end,newSequence);
       dragend=false;
       stack = [];
       reverse = false;

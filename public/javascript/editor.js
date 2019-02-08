@@ -8,21 +8,31 @@ var converter = {"A":"T", "T":"A", "G":"C", "C":"G", " ":" "};
 
 // TODO:
 // - move cursor to end upon enter 
-// - do copy button
-
+// optimated toggle between full and partial editor
+// disallow editing for annotation
 
 app.controller('myEditor',function($scope){
 	let DNA = angular.element($("#divider")).scope().seq;
 	$scope.text="AACTGTATGCGGAAAAGGAGGCCAGTGCATCAGA";
 	$scope.textbuffer = DNA;
+	// these two variables are here to save overhead of toggling between partial and full view
+	// when DNA length gets to 10,000 it gets slow toggling between DNA and viewer
+	// format for full DNA
+	$scope.dnaSections = returnList(DNA,$scope.buffer,$scope.bucket);
+	// format for partial DNA viewing
+	$scope.partialSections = returnList(DNA,$scope.buffer,$scope.bucket);
 	// dna base pairs per line
 	$scope.editStart = 0;
 	$scope.buffer = 50;
 	$scope.bucket = 10;
 	$scope.row1 = 0;
 	$scope.row2 = 1;
+	
+	// start and end points, but not for display, are 0 and 0 when the editor is displays full sequence
 	$scope.offsetStart = 0;
-	$scope.offsetEnd = 0;
+	$scope.offsetEnd = DNA.length;
+
+
 	$scope.rowIndices = generateIndices(50, 10);
 	// allowance for spacing
 	$scope.sections =returnList(DNA, $scope.buffer, $scope.bucket);
@@ -32,10 +42,19 @@ app.controller('myEditor',function($scope){
 	$scope.editing = 0;
 	$scope.lineDisplay = true;
 	$scope.setEditor = function(start, end, text){
+		console.log("called", start,end);
 		$scope.offsetStart = start;
 		$scope.offsetEnd = end;
 		$scope.textbuffer = text;
 		$scope.sections = returnList(text, $scope.buffer, $scope.bucket);
+	}
+	$scope.switchtoDNA = function(){
+		$scope.sections = $scope.dnaSections;
+	}
+	$scope.switchtoPartial = function(){
+		if($scope.offsetEnd!=0&&$scope.offsetStart!=0){
+			$scope.sections = $scope.partialSections;
+		}
 	}
 	$scope.switchLine = function(style){
 		$scope.lineDisplay=(style=="on");
@@ -106,7 +125,14 @@ app.controller('myEditor',function($scope){
 	$scope.disable=function(event){
 		// allow for (Ctrl|Meta) c,v,z copy, paste, undo
 		// for saving
+
+		//disallow enter for single editor
+		if($scope.display=="single"&&event.key=="Enter"){
+			event.preventDefault();
+			return;
+		}
 		if((event.ctrlKey==true||event.metaKey==true)&&event.key=="s"){
+			$scope.saveToBuffer(document.activeElement.id, $scope.editing);
 			$scope.saveProgress();
 			return;
 		}
@@ -136,14 +162,27 @@ app.controller('myEditor',function($scope){
 
 	// save all current progress permanently
 	$scope.saveProgress = function(){
+		console.log("saving progress??");
 		document.getElementById("dnaWrapper").className = "saved";
 		document.getElementById("saveButton").className = "savedButton";
 		let scope = angular.element($("#divider")).scope();
-		if($scope.offsetStart == 0){
-
+		let editorScope = angular.element($("#editorModule")).scope();
+		let diff = $scope.textbuffer.length-($scope.offsetEnd-$scope.offsetStart);
+		let newEnd = $scope.offsetEnd + diff;
+		let newStr = "";
+		if($scope.offsetStart<0){
+			let start = $scope.textbuffer.substring(Math.abs($scope.offsetStart));
+			let mid = editorScope.seq.substring($scope.offsetEnd, $scope.offsetStart+editorScope.seq.length);
+			let end = $scope.textbuffer.substring(0, Math.abs($scope.offsetStart));
+			newStr = start+mid+end;
 		}
-		$scope.text = $scope.textbuffer;
-		scope.seq = $scope.textbuffer;
+		else{
+			console.log("now am here???");
+			newStr = editorScope.seq.substring(0,$scope.offsetStart)+$scope.textbuffer+editorScope.seq.substring($scope.offsetEnd);
+		}
+
+		scope.seq = newStr;
+		$scope.offsetEnd = $scope.offsetStart+$scope.textbuffer.length;
 		scope.orfsFunc();
 	}
 
@@ -167,6 +206,13 @@ app.controller('myEditor',function($scope){
 		$scope.textbuffer = newText;
 		$scope.sections = returnList($scope.textbuffer, $scope.buffer, $scope.bucket);
 
+	},
+	$scope.editSingleRow = function(event){
+		console.log("edit single row called ", event.key);
+		if(event.keyCode==13||event.key=="Space"){
+			event.preventDefault();
+			console.log("I was here!!!", event.key);
+		}
 	},
 	$scope.editRow=function(index, event){
 		$scope.editing = 0;

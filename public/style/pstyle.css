@@ -7,6 +7,12 @@
 	outline:1px solid #ccc; 
 	width: 500px; 
 	height: 500px;
+	pointer-events: all;
+
+}
+
+#p1:hover{
+	/*fill:red;*/
 }
 #t1 {
  	fill:#f0f0f0;
@@ -38,15 +44,28 @@
   stroke: rgba(255,0,0,0);
   stroke-width: 2px;
 }
+
+.blastmarker{
+	/*stroke: green;*/
+	fill:green;
+}
+.blastmarker:hover{
+	fill:red;
+}
+
+
 .markerhover:hover {
   stroke: #f00;
   stroke-width: 2px;
   cursor: move;
 
 }
+
+
 .orfhover:hover {
-  stroke: #f00;
-  stroke-width: 2px;
+  /*stroke: #f00;*/
+  fill:red;
+  /*stroke-width: 2px;*/
 }
 .markertick{
 	stroke:rgba(255,0,0,0);

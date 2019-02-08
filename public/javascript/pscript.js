@@ -5,7 +5,7 @@ const startCodon = "ATG";
 const stopCodon = "ATT";
 
 // testStr ="AACTGTATGCGGAAAAGGAGGCCAGTGCATCAGAGAGTCGCAAACAGCTGTGAAGTCGCGTTCTCAAGAATTTGCAGCAGGCTGTGGCCACTTCGCCGGAAAAGGAGGCCAGTGCATCAGAGAGCAAGATCACAGCTGTGAAGTCGCTTCAACTGTATGCGGAAAAGGAGGCCAGTGCATCAGAGAGTCGCAAACAGCTGTGAAGTCGCGTTCTCAAGAATTTGCAGCAGGCTGTGGCCACTTCGCCGGAAAAGGAGGCCAGTGCATCAGAGAGCAAGATCACAGCTGTGAAGTCGCTTCAACTGTATGCGGAAAAGGAGGCCAGTGCATCAGAGAGTCGCAAACAGCTGTGAAGTCGCGTTCTCAAGAATTTGCAGCAGGCTGTGGCCACTTCGCCGGAAAAGGAGGCCAGTGCATCAGAGAGCAAGATCACAGCTGTGAAGTCGCTTCAACTGTATGCGGAAAAGGAGGCCAGTGCATCAGAGAGTCGCAAACAGCTGTGAAGTCGCGTTCTCAAGAATTTGCAGCAGGCTGTGGCCACTTCGCCGGAAAAGGAGGCCAGTGCATCAGAGAGCAAGATCACAGCTGTGAAGTCGCTTCAACTGTATGCGGAAAAGGAGGCCAGTGCATCAGAGAGTCGCAAACAGCTGTGAAGTCGCGTTCTCAAGAATTTGCAGCAGGCTGTGGCCACTTCGCCGGAAAAGGAGGCCAGTGCATCAGAGAGCAAGATCACAGCTGTGAAGTCGCTTCAACTGTATGCGGAAAAGGAGGCCAGTGCATCAGAGAGTCGCAAACAGCTGTGAAGTCGCGTTCTCAAGAATTTGCAGCAGGCTGTGGCCACTTCGCCGGAAAAGGAGGCCAGTGCATCAGAGAGCAAGATCACAGCTGTGAAGTCGCTTCAACTGTATGCGGAAAAGGAGGCCAGTGCATCAGAGAGTCGCAAACAGCTGTGAAGTCGCGTTCTCAAGAATTTGCAGCAGGCTGTGGCCACTTCGCCGGAAAAGGAGGCCAGTGCATCAGAGAGCAAGATCACAGCTGTGAAGTCGCTTCAACTGTATGCGGAAAAGGAGGCCAGTGCATCAGAGAGTCGCAAACAGCTGTGAAGTCGCGTTCTCAAGAATTTGCAGCAGGCTGTGGCCACTTCGCCGGAAAAGGAGGCCAGTGCATCAGAGAGCAAGATCACAGCTGTGAAGTCGCTTCAACTGTATGCGGAAAAGGAGGCCAGTGCATCAGAGAGTCGCAAACAGCTGTGAAGTCGCGTTCTCAAGAATTTGCAGCAGGCTGTGGCCACTTCGCCGGAAAAGGAGGCCAGTGCATCAGAGAGCAAGATCACAGCTGTGAAGTCGCTTCAACTGTATGCGGAAAAGGAGGCCAGTGCATCAGAGAGTCGCAAACAGCTGTGAAGTCGCGTTCTCAAGAATTTGCAGCAGGCTGTGGCCACTTCGCCGGAAAAGGAGGCCAGTGCATCAGAGAGCAAGATCACAGCTGTGAAGTCGCTTCAACTGTATGCGGAAAAGGAGGCCAGTGCATCAGAGAGTCGCAAACAGCTGTGAAGTCGCGTTCTCAAGAATTTGCAGCAGGCTGTGGCCACTTCGCCGGAAAAGGAGGCCAGTGCATCAGAGAGCAAGATCACAGCTGTGAAGTCGCTTCAACTGTATGCGGAAAAGGAGGCCAGTGCATCAGAGAGTCGCAAACAGCTGTGAAGTCGCGTTCTCAAGAATTTGCAGCAGGCTGTGGCCACTTCGCCGGAAAAGGAGGCCAGTGCATCAGAGAGCAAGATCACAGCTGTGAAGTCGCTTC";
-testStr = "AACTGTATGCGGAAAAGGAGGCCAGTGCATCAGAGAGTCGCAAACAGCTGTGAAGTCGCGTTCTCAAGAATTTGCAGCAGGCTGTGGCCACTTCGCCGGAAAAGGAGGCCAGTGCATCAGAGAGCAAGATCACAGCTGTGAAGTCGCTTC";
+testStr = "AACTGTATGCGGAAAAGGAGGCCAGTGCATCAGAGAGTCGCAAACAGCTGTGAAGTCGCGTTCTCAAGAATTTGCAGCAGGCTGTGGCCACTTCGCCGGAAAAGGAGGCCAGTGCATCAGAGAGCAAGATCACAGCTGTGAAGTCGCTTCAACTGTATGCGGAAAAGGAGGCCAGTGCATCAGAGAGTCGCAAACAGCTGTGAAGTCGCGTTCTCAAGAATTTGCAGCAGGCTGTGGCCACTTCGCCGGAAAAGGAGGCCAGTGCATCAGAGAGCAAGATCACAGCTGTGAAGTCGCTTC";
 // testStr="ATATAAATCGATATAAATCGATATAAATCGATATAAATCG";
 var app = angular.module('myApp', ['angularplasmid']);
     app.controller('myCtrl', function($scope, $compile, $element, $templateCache) {
@@ -35,7 +35,6 @@ var app = angular.module('myApp', ['angularplasmid']);
         $scope.interval = Math.floor(Math.max($scope.seq.length/30, 1));
         $scope.minLength = 0;
         $scope.orfs = findAllORF($scope.seq, $scope.minLength);
-
         $scope.setSearchPoints = function(start,end){$scope.selectedStart=start; $scope.selectedEnd=end;};
         $scope.setAnnotatePoints = function(start,end, name){$scope.annotateStart=start; $scope.annotateEnd=end; $scope.annotateName=name;};
         $scope.toggle = function(newSelected){toggle(newSelected)};
@@ -46,6 +45,14 @@ var app = angular.module('myApp', ['angularplasmid']);
           $scope.selectedEnd=false;
           $scope.view="";
           $scope.title="Viewer";
+        }
+
+        $scope.viewSearch = function(start,end){
+          $scope.toggle('search');
+          // $scope.showDNA('Sample Frame ', start, end); 
+          $scope.setSearchPoints(start, end); 
+          let editorScope = angular.element($("#editorModule")).scope();
+          editorScope.setEditor(start,end,$scope.seq.substring(start,end));
         }
         $scope.searchDNA = function(){
           $scope.title="";
@@ -77,6 +84,10 @@ var app = angular.module('myApp', ['angularplasmid']);
           $scope.showDNA('Annotated Frame ', start, end); 
           $scope.toggle('annotate'); 
           $scope.setAnnotatePoints(start, end, 'Annotated Frame');
+          let scope2 = angular.element($("#editorModule")).scope();
+          scope2.setEditor(start,end,$scope.seq.substring(start,end));
+
+
         };
         // reset highlighter
         $scope.reset = function(){
@@ -85,10 +96,14 @@ var app = angular.module('myApp', ['angularplasmid']);
           $scope.toggle("dna"); 
           $scope.title="";
           let scope2 = angular.element($("#editorModule")).scope();
-          scope2.setEditor(0,0,$scope.seq);
+          scope2.setEditor(0,$scope.seq.length,$scope.seq);
         };
         $scope.resetView = function(){$scope.view="";};
         $scope.resetSearch = function(){$scope.selectedEnd = false;$scope.selectedStart = false;};
+        $scope.focusAnnotation = function(start,end){
+          let scope2 = angular.element($("#editorModule")).scope();
+          scope2.setEditor(start,end,$scope.seq.substring(start,end));
+        }
         // removes the marker for the annotation, doesn't alter the sequence
         $scope.removeAnnotation = function(start,end){
           for(x=0;x<$scope.annotations.length;x++){
@@ -120,14 +135,40 @@ var app = angular.module('myApp', ['angularplasmid']);
         $scope.editInterval = function(e){editInterval(e)};
         $scope.editSequence = function(){editSequence();};
         $scope.submitSequence = function(start,end,e){submitSequence(Math.min(start,end),Math.max(start,end),e)};
+        $scope.viewORF = function(start,end){
+          let scope2 = angular.element($("#editorModule")).scope();
+          scope2.setEditor(start,end+2,$scope.seq.substring(start,end+2));
+        }
+        $scope.rid=false;
+        $scope.blastResults = getBlast();
+        $scope.blastMatch = [10,50];
+        // $scope.hspList = [{"bitscore":300, "score":300, "expect": "test", "identities":150, "align":150, "gaps":0}];
+        $scope.setBlast = function(start,end){
+          console.log("setting blast!!", start, end);
+          $scope.blastMatch = [start-1,end-1];
+        }
+        $scope.hspList =  getHSPList();
+
     });
+
+async function getBlast(){
+  let results = await getBlastText("5S0DJ4N6113");
+  // console.log("results are in!", results);
+  var ann = angular.element($("#divider")).scope();
+  ann.blastResults = results;
+  ann.hspList = await getHSPList();
+  // return results
+}
+
+
+console.log(getBlast());
 
 
 /*
 * Removes focus on tabs title in the interface
 */
 function deactivateTitle(){
-  document.getElementById("searchAnnotate").classList.remove("active");
+  // document.getElementById("searchAnnotate").classList.remove("active");
   document.getElementById("dna").classList.remove("active");
   document.getElementById("viewer").classList.remove("active");
 }
@@ -140,20 +181,20 @@ function toggle(newSelected){
   var ann = angular.element($("#divider")).scope();
   ann.selected = newSelected;
   deactivateTitle();
-  if(newSelected=="search"){
-    document.getElementById("searchAnnotate").classList.add("active");
-    ann.title="";
-    ann.view="";
-  }
   if(newSelected=="dna"){
     document.getElementById("dna").classList.add("active");
-    let scope2 = angular.element($("#editorModule")).scope();
-    scope2.setEditor(0,0,ann.seq);
+    let editorScope = angular.element($("#editorModule")).scope();
+    editorScope.setEditor(0,ann.seq.length,ann.seq);
+    // editorScope.switchtoDNA();
   }
   if(newSelected=="viewer"||newSelected=="annotate"){
     document.getElementById("viewer").classList.add("active");
+    // editorScope.switchtoPartial();
     let scope2 = angular.element($("#editorModule")).scope();
-    scope2.setEditor(ann.start,ann.end,ann.seq.substring(ann.start,ann.end));
+    scope2.setEditor(ann.start,ann.end,ann.seq.substring(ann.start,ann.end)); 
+  }
+  if(newSelected=="orf"){
+    document.getElementById("viewer").classList.add("active");
   }
 }
 
@@ -202,18 +243,6 @@ function submitSequence(start,end, event){
 }
 
 
-
-
-/*
-* Allows for sequence editing
-*/
-
-function editSequence(){
-  var scope = angular.element($("#divider")).scope();
-  var editor = document.getElementById("sampleeditor");
-  editor.setAttribute("contentEditable", "true");
-}
-
 /*
 * Annotates section of the plasmid. Annotations may not overlap
 * @param{int} start - start index of the annotation
@@ -235,15 +264,6 @@ function annotate(start, end){
   return true;
 }
 
-/*
-* Allows focus on editing the annotation
-*/
-function editAnnotation(){
-  var scope = angular.element($("#divider")).scope();
-  var editor = document.getElementById("annotationeditor");
-  editor.setAttribute("contentEditable", "true");
-  editor.focus();
-}
 /*
 * After editing, submit the new annottation
 * shifts all annotations behind edited annotation to addition or deletion
@@ -412,14 +432,17 @@ function findAllORF(seq, minLength){
     }
     index = start+1;
   }
+  console.log("sorting???");
+
   // sort by orf length, easier for clicking on and rendering
   results.sort(function(a, b) {
     let x1 = Math.min(a[0], a[1]);
     let x2 = Math.max(a[0],a[1]);
     let y1 = Math.min(b[0], b[1]);
     let y2 = Math.max(b[0],b[1]);
-    return Math.abs(x1-x2) - Math.abs(y1-y2);
+    return Math.abs(Math.abs(x1-x2) - Math.abs(y1-y2));
   });
+  console.log(results);
   return results;
 }
 
