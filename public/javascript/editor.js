@@ -28,7 +28,7 @@ app.controller('myEditor',function($scope){
 	$scope.row2 = 1;
 
 	// matched blast from other scope
-	$scope.editorBlastMatch = {"test": true};
+	$scope.editorBlastMatch = {};
 	$scope.showBlast = false;
 	$scope.blastSections=[];
 	$scope.shownBlast = [];
@@ -253,7 +253,7 @@ app.controller('myEditor',function($scope){
 	// formats the blast match to match in the editor
 	$scope.formatBlast = function(){
 		console.log("calling formatBlast?", $scope.editorBlastMatch);
-		if($scope.editorBlastMatch=={}){return;}
+		if(!$scope.editorBlastMatch.qseq){return;}
 		let hfrom = Math.min($scope.editorBlastMatch.hfrom, $scope.editorBlastMatch.hto);
 		let hto = Math.max($scope.editorBlastMatch.hfrom, $scope.editorBlastMatch.hto);
 		let qseq = $scope.editorBlastMatch.qseq;
@@ -267,6 +267,7 @@ app.controller('myEditor',function($scope){
 		let end = Math.max($scope.start, $scope.offsetEnd);
 		let results = [];
 		let rowValue = "";
+
 		console.log("st, ", start,",",end, hfrom, hto);
 		// let qcounter = $scope.editorBlastMatch.qfrom;
 		let qcounter = 0;
@@ -274,65 +275,38 @@ app.controller('myEditor',function($scope){
 		// 	qcounter+=
 		// }
 		let counter = 0;
-
+		let segment = [];
+		// DENG: error case when start = -5 end = 21 , query # 2
+		// have to do special case
 		for(counter=start;counter<end;counter+=$scope.buffer){
-			console.log("st, ", start,",",end, hfrom, hto);
-			console.log("running", counter);
+			// special case
+			if(counter<0&&counter+$scope.buffer>0){
+				// let partALen =
+				let partA = formatBlastHelper($scope.editorBlastMatch, counter+$scope.DNA.length, $scope.bucket, $scope.buffer);
+				let partB = formatBlastHelper($scope.editorBlastMatch, 0, $scope.bucket, $scope.buffer);
+				
+				if((partA.length==0||partA==-1) && partB.length>0){
+					partA = genSpace($scope.DNA.length-(counter+$scope.DNA.length))
 
-			// convert to
-			let index = counter;
-
-			if(counter<0){
-				index = counter+$scope.DNA.length;
-			}
-			// let index = counter>0 ? counter : counter+$scope.textbuffer.length;
-			if(index<hfrom){
-				// just beginnigg match site
-				// x<hfrom<x+bucket
-				if(hfrom<index+$scope.buffer){
-					let matchedLength = index+$scope.buffer - hfrom;
-					console.log("row value is? ", rowValue, rowValue.length);
-					rowValue+=genSpace(hfrom-index);
-					console.log("row value is? ", rowValue, rowValue.length, hfrom-index);
-					console.log("qseq? ", qseq.length, qseq);
-					rowValue+=qseq.substring(qcounter, qcounter+matchedLength);
-					console.log(qseq.length, "val of row ", qseq.substring(qcounter, qcounter+matchedLength))
-					qcounter+=matchedLength;
-					console.log("qcounter, ", qcounter," matchedLength:", matchedLength, "hfrom: ", hfrom);
-
-					console.log("val?",rowValue);
-					results.push(breakUpRow($scope.bucket, rowValue));
-					rowValue = "";
+					console.log("space?", partA, partB, "st:", partA+partB)
+					segment = breakUpRow($scope.bucket, partA+partB);
+					console.log("SEGMENT IS", segment);
+					// segmentpartB;	
 
 				}
-				// not at match site yet
 				else{
-					results.push([])
+					console.log("partA", partA, partB)
+					segment = partA.concat(partB);
 				}
+				// console.log("partA", partA, "partB", partB);
 			}
-			// x>=hfrom
 			else{
-				// qcounter = $scope.editorBlastMatch.qfrom+(index-hfrom);
-				qcounter = (index-hfrom);
-
-				console.log("MADE IT HERE");
-				if(index<=hto){
-					console.log($scope.editorBlastMatch.qfrom, $scope.editorBlastMatch.qto)
-					console.log("qcounter", qcounter, "q end", qcounter+$scope.buffer);
-					rowValue=qseq.substring(qcounter, qcounter+$scope.buffer);
-
-					// qcounter+=$scope.buffer;
-					results.push(breakUpRow($scope.bucket, rowValue));
-					console.log("value now",rowValue);
-					rowValue = "";
-
-
-				}
-				// done
-				else{
-					break;
-				}
+				let index = counter>=0 ? counter : counter+$scope.DNA.length;
+				segment =formatBlastHelper($scope.editorBlastMatch, index, $scope.bucket, $scope.buffer);
 			}
+			// poison pill, matching is finished
+			if(segment==-1){break;}
+			results.push(segment);
 
 		}
 		$scope.blastSections=results;
@@ -340,6 +314,63 @@ app.controller('myEditor',function($scope){
 		console.log("FINISHED---------", results);
 	}
 });
+
+
+function formatBlastHelper(editorBlastMatch, index, bucket, buffer){
+	let hfrom = Math.min(editorBlastMatch.hfrom, editorBlastMatch.hto);
+	let hto = Math.max(editorBlastMatch.hfrom, editorBlastMatch.hto);
+	let qseq = editorBlastMatch.qseq;
+	let qcounter = 0;
+	let row = [];
+	let rowValue="";
+	if(index<hfrom){
+		// just beginning match site
+		// x<hfrom<x+bucket
+		console.log("hfrom ", hfrom, index+buffer, hfrom<index+buffer)
+		if(hfrom<index+buffer){
+			let matchedLength = index+buffer - hfrom;
+			// console.log("row value is? ", rowValue, rowValue.length);
+			rowValue+=genSpace(hfrom-index);
+			console.log("row value is? ", rowValue, rowValue.length, hfrom-index);
+			console.log("qseq? ", qseq.length, qseq); 
+			rowValue+=qseq.substring(0, matchedLength);
+			console.log(qseq.length, "val of row ", qseq.substring(0, matchedLength))
+			console.log("qcounter, ", qcounter," matchedLength:", matchedLength, "hfrom: ", hfrom);
+
+			// console.log("val?",rowValue);
+			row = breakUpRow(bucket, rowValue);
+			rowValue = "";
+
+		}
+		// not at match site yet
+		else{
+			row = [];
+		}
+	}
+	// x>=hfrom   
+	else{
+		// qcounter = $scope.editorBlastMatch.qfrom+(index-hfrom);
+		qcounter = (index-hfrom);
+
+		console.log("MADE IT HERE", "qcounter", qcounter, "index", index, "hfrom", hfrom, "hto", hto);
+		// hfrom<=x<=hto
+		if(index<=hto){
+			console.log(editorBlastMatch.qfrom, editorBlastMatch.qto)
+			console.log("qcounter", qcounter, "q end", qcounter+buffer);
+			rowValue=qseq.substring(qcounter, qcounter+buffer);
+			row = breakUpRow(bucket, rowValue);
+			console.log("value now",rowValue);
+			rowValue = "";
+
+		}
+		// done
+		else{
+			// break;
+			return -1;
+		}
+	}
+	return row;
+}
 
 function breakUpRow(bucket, text){
 	let segments = "";
