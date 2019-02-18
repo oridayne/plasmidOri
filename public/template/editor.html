@@ -1,4 +1,4 @@
-<div id="editorModule" ng-controller="myEditor">
+<div id="editorModule" ng-controller="myEditor" ng-show="textbuffer.length>0">
     <div>   
             <label class="container">Double
               <input type="radio" checked="checked" name="editor" ng-click="switchDisplay('default')">
@@ -34,8 +34,23 @@
                                     </div>
                                 </div>
 
+                                <!-- positive strand blast match -->
+                                <div class="blastCompare" ng-show="blastSections.length!=0&& blastSections[$index].length!=0">
+                                    <input id="{{$index}}blast" spellcheck="false" class="blastMatch" ng-model="blastSections[$index]" readonly>
+
+                                </div>
+                                <!-- <div id="{{$index}}blast" class="blastMatch"></div> -->
+                                <!-- positive strand -->
                                 <input id="{{$index}}" spellcheck="false" ng-click="startEditing($event)" ng-blur="saveToBuffer($index, row1)" ng-keydown="disable($event)" class="input" ng-model="row[0]" contenteditable ng-keyup="editRow($index, $event)">
+
+                                <!-- negative strand -->
                                 <input id="{{$index}}row2" spellcheck="false" ng-click="startEditing($event)" ng-blur="saveToBuffer($index, row2)" ng-model="row[1]" ng-keydown="disable($event)" class="input" contenteditable ng-keyup="editSecondRow($index, $event)">
+                                
+                                <!-- negative strand blast match -->
+                                <div class="blastCompare" ng-show="blastSections.length!=0&& blastSections[$index].length!=0">
+                                    minus
+                                    <input id="{{$index}}blast" spellcheck="false" class="blastMatch" ng-model="blastSections[$index]" readonly>
+                                </div>
                             </div>
                         </p>
                     </div>

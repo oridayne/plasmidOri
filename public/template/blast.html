@@ -1,0 +1,58 @@
+<div ng-show="selected=='blast'">
+
+    <div id="blastWrapper">
+        <!-- <div contentEditable=true data-text="Enter query here" id="blastSubmit"></div> -->
+        
+        <div class="blastStyle" ng-show="loading">Loading...</div>
+
+        <div id="hspList">
+
+            <div ng-show="!rid" contentEditable=true data-text="Enter query here" id="blastSubmit"></div>
+
+
+            </div>
+            <div ng-show="rid" class="blastStyle">
+                RID:{{rid}} <br> 
+                Blast Link: https://blast.ncbi.nlm.nih.gov/blast/BlastAlign.cgi?CMD=GET&RID={{rid}}
+            </div>
+            <!-- wrapper -->
+            <div ng-repeat="x in hspList track by $index" class="blastHSP" ng-click="setBlast(x)">
+                <!-- header -->
+                <div>
+                    <strong>Range {{x.num}}: {{x.hfrom}} to {{x.hto}}</strong>
+                    <br>
+                    Score = {{x["bitscore"]}} bits ({{x.score}}), Expect={{x.expect}}<br>
+                    Identities={{x.identities}}/{{x.align}} ({{((x.identities/x.align)*100).toFixed(0)}}%), Gaps = {{x.gaps}}/{{x.align}} ({{((x.gaps/x.align)*100).toFixed(0)}}%)
+                </div>
+                <!-- left indice -->
+                <div class="blastStyle">
+                    <div class="blastIndex">
+                        <div ng-repeat="indice in x.leftIndices">
+                            Query {{indice[0]}} <br><br>
+                            Sbjct {{indice[1]}} <br><br>
+                        </div>
+                    </div>
+
+                    <!-- info -->
+                    <div>
+                        <div ng-repeat="i in x.seqs">
+                                <div>{{i[0]}}</div>
+                                <div>{{i[1]}}</div>
+                                <div>{{i[2]}}</div>
+                            <br>
+                        </div>
+                    </div>
+
+                    <!-- right indice -->
+                    <div class="blastIndex">
+                        <div ng-repeat="rightIndex in x.rightIndices">
+                            {{rightIndex[0]}} <br><br>
+                            {{rightIndex[1]}} <br><br>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

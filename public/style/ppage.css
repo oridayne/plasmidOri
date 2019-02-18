@@ -1,6 +1,6 @@
 :root{
 	--canvas-width: 542px;
-	--canvas-modified:536px;
+	--canvas-modified:500px;
 	--canvas-height:300px;
 }
 
@@ -13,46 +13,17 @@
 }
 #searchDNA{
 	width: var(--canvas-modified);
-	/*max-width: var(--canvas-modified);*/
-	/*min-width: var(--canvas-modified);*/
 	height: 20px;	
 	font-size: 16px;
 	font-family: "Courier New", Courier, monospace;
-
+	text-transform: uppercase;
+	margin:auto;
+	resize:both;
+	margin-bottom: 5px;
 }
 
-
-#sequence{
-	width: 100%;
-	max-width: var(--canvas-modified);
-	height: 100px;
-	overflow-y: scroll;
-	line-height:25px;
-}
 
 #dnatext{
-	font-size: 12px;
-	font-family: Verdana;
-}
-
-.view{
-	width: var(--canvas-width);
-	height: 300px;
-	outline: 1px solid gray;
-	word-wrap: break-word; 
-	overflow-y: auto;
-	line-height:25px;
-	font-size: 12px;
-	font-family: Verdana;
-}
-
-.viewSmaller{
-	width: var(--canvas-width);
-	height: 200px;
-	outline: 1px solid gray;
-	word-wrap: break-word; 
-	overflow-y: auto;
-	line-height:25px;
 	font-size: 12px;
 	font-family: Verdana;
 }
@@ -183,9 +154,13 @@
 	outline: 1px solid LightGray;		
 }
 
-.holder:hover{
-	
+
+#clearButton{
+	/*display: block;*/
+	height: 20px;
+	margin: auto;
 }
+
 
 .sideInfo{
 	color:black;
@@ -203,6 +178,22 @@
 	margin-top:5px;
 }
 
+.blastCenter{
+	/*outline: 1px solid red;*/
+	width: 98%;
+	margin:auto;
+	margin-top: 10px;
+}
+
+#blastSubmit{
+	font-size: 14px;
+	font-family: "Courier New", Courier, monospace;
+	width:100%;
+	outline: 1px solid silver;
+	border: none;
+	min-height: 300px;
+	margin-top: 10px;
+}
 
 .blastHSP{
 	padding-left: 5px;
@@ -218,9 +209,16 @@
 	margin-bottom: 10px;
 }
 
+[contentEditable=true]:empty:not(:focus):before{
+    content:attr(data-text)
+}
 
 .blastHSP:hover{
 	outline: 1.5px solid steelblue;
+}
+
+.activeBlast{
+	outline: 2px solid green;
 }
 
 

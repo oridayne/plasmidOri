@@ -36,13 +36,13 @@
                         <trackmarker class="highlight" ng-repeat='n in annotations' start='{{n.start}}' end='{{n.end}}' ng-click="toggle('annotate'); setAnnotatePoints(n.start, n.end, n.name); focusAnnotation(n.start,n.end);"  ></trackmarker>
                         
                         <!-- search results -->
-                        <trackmarker   markerclass="markerhover" markerstyle="fill:rgba(128,0,0,0.2)" ng-repeat='n in searchResults' start='{{n.start}}' end='{{n.end}}' vadjust="25"  ng-click="viewSearch(n.start,n.end) "></trackmarker>
+                        <trackmarker   markerclass="markerhover" markerstyle="fill:rgba(128,0,0,0.2)" ng-repeat='n in searchResults' ng-dblclick="clear();" start='{{n.start}}' end='{{n.end}}' vadjust="25"  ng-click="viewSearch(n.start,n.end) "></trackmarker>
 
                         <!-- ORFS -->
                         <trackmarker ng-repeat='n in orfsdata' markerclass="orfhover" ng-click="viewORF(n[0],n[1]); toggle('orf');"  start="{{n[0]}}" end="{{n[1]}}"  vadjust="-20" wadjust="-23" arrowstartlength="0.8" arrowstartwidth="10" arrowendlength="5" arrowendwidth="3"></trackmarker>
                         
                         <!-- blast matches -->
-                        <trackmarker markerclass="blastmarker"  start="{{blastMatch[0]}}" end="{{blastMatch[1]}}"  vadjust="-5" wadjust="-23" ></trackmarker>
+                        <trackmarker markerclass="blastmarker"  start="{{blastMatch.hfrom}}" end="{{blastMatch.hto}}"  vadjust="-5" wadjust="-23"  ng-click="toggle('viewer'); changeEditor(blastMatch.hfrom, blastMatch.hto);" ng-dblclick="resetBlast();deactivateAllHsp();"></trackmarker>
 
                         <!-- drawing arc forward -->
                         <trackmarker markerclass="markerhover" ng-if="ed!=false && start<end" start="{{start}}" end="{{end}}" ng-click="toggle('viewer')" ng-dblclick="reset();" vadjust="25" markerstyle="fill:rgba(0,128,0,0.2)" wadjust=""></trackmarker>
@@ -60,6 +60,8 @@
                             <p>Sequence Length:{{seq.length}}</p>
                             <p>ORF Minimum Length:<input type="number" id="orf" class="viewControl" ng-keydown="editOrfMinLength($event)" value={{minLength}}></p>
                             <p>tick interval:<input id="interval" class="viewControl" ng-keydown="editInterval($event)" type="number" value={{interval}}></p>
+                            <input type="number" ng-model="start">
+                            <input type="number" ng-model="end">
                         </div>
 
                     </div>
@@ -77,63 +79,94 @@
                     <!-- content for dna editing -->
                      <div ng-show="selected=='viewer'||selected=='orf'||selected=='dna'||selected=='annotate'||selected=='search'" id="controlDNA" >
                     <!-- content for viewing annotations -->
-                    <div ng-show="selected=='annotate'">
-                        <input id="name" ng-click="editName()" ng-keydown="editKeys($event)" class="editFocus" ng-model="annotateName" readonly>
-                        <button class="btn" ng-click="removeAnnotation(annotateStart, annotateEnd)">Remove Annotation</button>
-                        <button class="btn" ng-click="removeAnnotation(annotateStart, annotateEnd);deleteAnnotation(annotateStart, annotateEnd); orfsFunc();">Delete Sequence</button>
+                        <div ng-show="selected=='annotate'">
+                            <input id="name" ng-click="editName()" ng-keydown="editKeys($event)" class="editFocus" ng-model="annotateName" readonly>
+                            <button class="btn" ng-click="removeAnnotation(annotateStart, annotateEnd)">Remove Annotation</button>
+                            <button class="btn" ng-click="removeAnnotation(annotateStart, annotateEnd);deleteAnnotation(annotateStart, annotateEnd); orfsFunc();">Delete Sequence</button>
+                        </div>
+
+                        <!-- search bar -->
+                        <div>
+                            <input type="text" placeholder="Search.." id="searchDNA" ng-keydown="disable($event)" ng-keyup="searchDNA();" ng-model="search">
+                            <button  id="clearButton" ng-click="clear();">Clear</button>
+                        </div>
+
+                            <!-- editor template -->
+                        <div ng-include="'template/editor.html'"></div>
+
+                        <button ng-show="(start!=end)&&selected=='viewer'" id="annotateButton" ng-click="annotate(start, end);">Annotate</button>
+
+                        <button ng-show="selectedStart" ng-click="annotate(selectedStart, selectedEnd);">Annotate</button>
                     </div>
-                     <textarea type="text" placeholder="Search.." id="searchDNA" ng-model="search"></textarea>
-                        <button ng-click="searchDNA();" id="searchbutton">Go!</button><button ng-click="clear()">Clear</button>
-                       <div ng-include="'javascript/editor.html'"></div>
-                       <button ng-show="selected=='viewer'" id="annotateButton" ng-click="annotate(start, end);">Annotate</button>
-                    </div>
 
-                    <div ng-show="selected=='blast'">
-                        <div id="blastWrapper">
+                    <!-- blast viewer -->
+                    <!-- <div ng-include="'template/blast.html'"></div> -->
+<div ng-show="selected=='blast'">
 
-                            <div ng-show="rid!=false">{{rid}}</div>
-                            <div id="hspList">
-                                <!-- wrapper -->
-                                <div ng-repeat="x in hspList" class="blastHSP" ng-click="setBlast(x.hfrom, x.hto)">
-                                    <!-- header -->
-                                    <div>
-                                        <strong>Range {{x.num}}: {{x.hfrom}} to {{x.hto}}</strong>
-                                        <br>
-                                        Score = {{x["bitscore"]}} bits ({{x.score}}), Expect={{x.expect}}<br>
-                                        Identities={{x.identities}}/{{x.align}} ({{((x.identities/x.align)*100).toFixed(0)}}%), Gaps = {{x.gaps}}/{{x.align}} ({{((x.gaps/x.align)*100).toFixed(0)}}%)
-                                    </div>
-                                    <!-- left indice -->
-                                    <div class="blastStyle">
-                                        <div class="blastIndex">
-                                            <div ng-repeat="indice in x.leftIndices">
-                                                Query {{indice[0]}} <br><br>
-                                                Sbjct {{indice[1]}} <br><br>
-                                            </div>
-                                        </div>
+    <div id="blastWrapper">
+        <!-- <div contentEditable=true data-text="Enter query here" id="blastSubmit"></div> -->
+        <div class="blastStyle" ng-show="loading">Loading...</div>
+        <div id="hspList">
 
-                                        <!-- info -->
-                                        <div>
-                                            <div ng-repeat="i in x.seqs">
-                                                    <div>{{i[0]}}</div>
-                                                    <div>{{i[1]}}</div>
-                                                    <div>{{i[2]}}</div>
-                                                <br>
-                                            </div>
-                                        </div>
+            <div ng-show="!rid" class="blastCenter">
+                
+                <textarea id="blastSubmit" ng-model="blastQuery" placeholder="Enter nucelotide query here"></textarea>
+                <button ng-click="blastSequence()">Blast</button>
 
-                                        <!-- right indice -->
-                                        <div class="blastIndex">
-                                            <div ng-repeat="rightIndex in x.rightIndices">
-                                                {{rightIndex[0]}} <br><br>
-                                                {{rightIndex[1]}} <br><br>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+            </div>
 
-                            </div>
+
+            </div>
+            <div ng-show="rid" >
+                <div class="blastStyle">
+                    RID:{{rid}} <br> 
+                    Blast Link: https://blast.ncbi.nlm.nih.gov/blast/BlastAlign.cgi?CMD=GET&RID={{rid}}
+                </div>
+                <button ng-click="clearBlast();">Clear</button>
+                
+            </div>
+            <!-- wrapper -->
+            <div ng-repeat="x in hspList track by $index" class="blastHSP" ng-click="setBlast(x); activateHsp($index)" id="hsp{{$index}}">
+                <!-- header -->
+                <div>
+                    <strong>Range {{x.num}}: {{x.hfrom}} to {{x.hto}}</strong>
+                    <br>
+                    Score = {{x["bitscore"]}} bits ({{x.score}}), Expect={{x.expect}}<br>
+                    Identities={{x.identities}}/{{x.align}} ({{((x.identities/x.align)*100).toFixed(0)}}%), Gaps = {{x.gaps}}/{{x.align}} ({{((x.gaps/x.align)*100).toFixed(0)}}%)
+                </div>
+               
+                <div class="blastStyle" ng-show="testToggle==$index">
+                    <div class="blastIndex">
+                         <!-- left indice -->
+                        <div ng-repeat="indice in x.leftIndices">
+                            Query {{indice[0]}} <br><br>
+                            Sbjct {{indice[1]}} <br><br>
                         </div>
                     </div>
+
+                    <!-- info -->
+                    <div>
+                        <div ng-repeat="i in x.seqs">
+                                <div>{{i[0]}}</div>
+                                <div>{{i[1]}}</div>
+                                <div>{{i[2]}}</div>
+                            <br>
+                        </div>
+                    </div>
+
+                    <!-- right indice -->
+                    <div class="blastIndex">
+                        <div ng-repeat="rightIndex in x.rightIndices">
+                            {{rightIndex[0]}} <br><br>
+                            {{rightIndex[1]}} <br><br>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
 
                 </div>
 

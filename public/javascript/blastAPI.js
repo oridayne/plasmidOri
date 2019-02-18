@@ -77,7 +77,7 @@ function returnFailed(axiosResponse){
 	 const fullResponse = axiosResponse.response === undefined
     ? axiosResponse
     : axiosResponse.response;
-    console.log("full response, failed");
+    console.log("full response, failed", fullResponse.data);
   return fullResponse.data;
 }
 
@@ -96,8 +96,8 @@ function parseBlastXML(xml){
 
 // debugging function
 // TODO: work this in such that it takes xml response, and gets HSP List
-async function getHSPList(){
-	let xml = await getBlastXML("5S0DJ4N6113");
+async function getHSPList(RID){
+	let xml = await getBlastXML(RID);
 	let hspList = parseBlastXML(xml);
 	let el = document.getElementById("blastWrapper");
 	let hspObjs = [];
@@ -138,6 +138,19 @@ function parseHspObj(hsp){
 	obj.qto = parseInt(hsp.getElementsByTagName("Hsp_query-to")[0].innerHTML)
 	obj.hfrom = parseInt(hsp.getElementsByTagName("Hsp_hit-from")[0].innerHTML);
 	obj.hto = parseInt(hsp.getElementsByTagName("Hsp_hit-to")[0].innerHTML);
+
+
+	// the blast API match index starts at 0, wheras in programming strings start at 1
+	// i will convert this to programming convention
+	obj.qfrom-=1;
+	obj.qto-=1;
+	obj.hfrom-=1;
+	obj.hto-=1;
+
+	// indices where query string does not match subject string 
+	obj.indexmismatch = [];
+	//if matches complementary string, this is true
+	obj.minus = obj.hfrom>obj.hto;
 	obj.leftIndices = [];
 	obj.rightIndices = [];
 
@@ -145,21 +158,37 @@ function parseHspObj(hsp){
 	let qfromCounter = obj.qfrom;
 	let hfromCounter = obj.hfrom;
 
+
 	for(y=0;y<obj.qseq.length;y+=bucket){
 
 		let qseq = obj.qseq.substring(y, y+bucket);
 		let mid = obj.midline.substring(y, y+bucket);
 		let hseq = obj.hseq.substring(y, y+bucket);
 		
+		// basepair mismatch detection
+		let qincTemp = qfromCounter;
+		let hincTemp = hfromCounter;
+
+		// do we inc or dec the hit counter, depending on pos or neg strand match
+		let hinc = obj.minus ? -1 : 1;
+		for(bp = y;bp<y+bucket;bp++){
+			let curIndex = bp;
+			if(obj.qseq[curIndex]=="-"){continue;}
+			// if(obj.qseq[curIndex]!=obj.)
+
+
+		}
+
 		obj.leftIndices.push([qfromCounter, hfromCounter]);
 
 		// mismatched spaces in the query sequence do not count towards the counter
+		// these are represented by a '-' in the blast API return format
 		let qincrement = qseq.replace(/-/g, "").length;
 		let hincrement = hseq.replace(/-/g,"").length;
 		// console.log("qfrom", qfromCounter, qincrement, qfromCounter+qincrement)
 		qfromCounter+=qincrement;
 		// reverse alignment match
-		if(obj.hfrom>obj.hto){
+		if(obj.minus){
 			hfromCounter-= hincrement;
 			obj.rightIndices.push([qfromCounter-1, hfromCounter+1]);
 		}
@@ -168,6 +197,9 @@ function parseHspObj(hsp){
 			obj.rightIndices.push([qfromCounter-1, hfromCounter-1]);
 		}
 		obj.seqs.push([qseq,mid,hseq]);
+
+
+
 	}
 	return obj;
 }

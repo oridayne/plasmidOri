@@ -1,7 +1,6 @@
 // var editorApp = angular.module('textApp', []);
 
 var acceptedLetters = {"a":true, "g":true, "c":true, "t":true, "A":true, "G":true, "C":true, "T":true, " ":true};
-// DENG: maybe, test on windows for control?
 var acceptedKeys = {"Shift":true, "Backspace":true, "ArrowLeft":true, "ArrowRight":true, "Enter": true};
 var converter = {"A":"T", "T":"A", "G":"C", "C":"G", " ":" "};
 
@@ -27,7 +26,12 @@ app.controller('myEditor',function($scope){
 	$scope.bucket = 10;
 	$scope.row1 = 0;
 	$scope.row2 = 1;
-	
+
+	// matched blast from other scope
+	$scope.editorBlastMatch = {"test": true};
+	$scope.showBlast = false;
+	$scope.blastSections=[];
+	$scope.shownBlast = [];
 	// start and end points, but not for display, are 0 and 0 when the editor is displays full sequence
 	$scope.offsetStart = 0;
 	$scope.offsetEnd = DNA.length;
@@ -43,19 +47,14 @@ app.controller('myEditor',function($scope){
 	$scope.lineDisplay = true;
 	$scope.setEditor = function(start, end, text){
 		console.log("called", start,end);
-		$scope.offsetStart = start;
-		$scope.offsetEnd = end;
+		$scope.offsetStart = Math.min(start,end);
+		$scope.offsetEnd = Math.max(start,end);
 		$scope.textbuffer = text;
 		$scope.sections = returnList(text, $scope.buffer, $scope.bucket);
+		$scope.formatBlast();
+
 	}
-	$scope.switchtoDNA = function(){
-		$scope.sections = $scope.dnaSections;
-	}
-	$scope.switchtoPartial = function(){
-		if($scope.offsetEnd!=0&&$scope.offsetStart!=0){
-			$scope.sections = $scope.partialSections;
-		}
-	}
+
 	$scope.switchLine = function(style){
 		$scope.lineDisplay=(style=="on");
 	}
@@ -102,6 +101,7 @@ app.controller('myEditor',function($scope){
 			for(subIndex=0;subIndex<$scope.buffer;subIndex+=$scope.bucket){
 				let label = (index*$scope.buffer)+subIndex;
 				// filler space
+				// 10(characters per bucket)
 				let numSpaces = genSpace(11- String(label).length); 
 				subIndices+=label+numSpaces;
 			}
@@ -248,7 +248,100 @@ app.controller('myEditor',function($scope){
 
 	}
 
+	// is it possible for the query string to be larger????
+	$scope.blastSections = [];
+	// formats the blast match to match in the editor
+	$scope.formatBlast = function(){
+		console.log("calling formatBlast?", $scope.editorBlastMatch);
+		if($scope.editorBlastMatch=={}){return;}
+		let hfrom = Math.min($scope.editorBlastMatch.hfrom, $scope.editorBlastMatch.hto);
+		let hto = Math.max($scope.editorBlastMatch.hfrom, $scope.editorBlastMatch.hto);
+		let qseq = $scope.editorBlastMatch.qseq;
+		console.log("qseq is--------------------!", qseq.length, qseq);
+		// TODO: what happens if negative indices are involved?????
+		// TODO: check for off by one errors?
+		// NOTE: blast api does not recognize that, huh!
+		//obj.hfrom, obj.hto
+
+		let start = Math.min($scope.offsetStart, $scope.offsetEnd);
+		let end = Math.max($scope.start, $scope.offsetEnd);
+		let results = [];
+		let rowValue = "";
+		console.log("st, ", start,",",end, hfrom, hto);
+		let qcounter = $scope.editorBlastMatch.qfrom;
+
+		// if(start<$scope.editorBlastMatch.qfrom&& end>$scope.editorBlastMatch.qfrom){
+		// 	qcounter+=
+		// }
+		let counter = 0;
+		for(counter=start;counter<end;counter+=$scope.buffer){
+			console.log("st, ", start,",",end, hfrom, hto);
+			console.log("running", counter);
+			if(counter<hfrom){
+				// just beginnigg match site
+				// x<hfrom<x+bucket
+				if(hfrom<counter+$scope.buffer){
+					let matchedLength = counter+$scope.buffer - hfrom;
+					console.log("row value is? ", rowValue, rowValue.length);
+					rowValue+=genSpace(hfrom-counter);
+					console.log("row value is? ", rowValue, rowValue.length, hfrom-counter);
+					console.log("qseq? ", qseq.length, qseq);
+					rowValue+=qseq.substring(qcounter, qcounter+matchedLength);
+					console.log(qseq.length, "val of row ", qseq.substring(qcounter, qcounter+matchedLength))
+					qcounter+=matchedLength;
+					console.log("qcounter, ", qcounter," matchedLength:", matchedLength, "hfrom: ", hfrom);
+
+					console.log("val?",rowValue);
+					results.push(breakUpRow($scope.bucket, rowValue));
+					rowValue = "";
+
+				}
+				// not at match site yet
+				else{
+					results.push([])
+				}
+			}
+			// x>=hrom
+			else{
+				qcounter = $scope.editorBlastMatch.qfrom+(counter-hfrom);
+				console.log("MADE IT HERE");
+				if(counter<=hto){
+					console.log($scope.editorBlastMatch.qfrom, $scope.editorBlastMatch.qto)
+					console.log("qcounter", qcounter, "q end", qcounter+$scope.buffer);
+					rowValue=qseq.substring(qcounter, qcounter+$scope.buffer);
+
+					// qcounter+=$scope.buffer;
+					results.push(breakUpRow($scope.bucket, rowValue));
+					console.log("value now",rowValue);
+					rowValue = "";
+
+
+				}
+				// done
+				else{
+					break;
+				}
+			}
+
+		}
+		$scope.blastSections=results;
+
+		console.log("FINISHED---------", results);
+	}
 });
+
+function breakUpRow(bucket, text){
+	let segments = "";
+	if(text.length<=0||text==false){
+		console.log("error, bad text!", text);
+		return;
+	}
+	for(i=0;i<text.length;i+=bucket){
+		// console.log("in break up row?", i, text, bucket);
+		segments+=text.substring(i,i+bucket)+"    ";
+	}
+	return segments;
+}
 
 function genSpace(num){
 	let spaces = "";
