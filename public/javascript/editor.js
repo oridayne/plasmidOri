@@ -11,15 +11,15 @@ var converter = {"A":"T", "T":"A", "G":"C", "C":"G", " ":" "};
 // disallow editing for annotation
 
 app.controller('myEditor',function($scope){
-	let DNA = angular.element($("#divider")).scope().seq;
+	$scope.DNA = angular.element($("#divider")).scope().seq;
 	$scope.text="AACTGTATGCGGAAAAGGAGGCCAGTGCATCAGA";
-	$scope.textbuffer = DNA;
+	$scope.textbuffer = $scope.DNA;
 	// these two variables are here to save overhead of toggling between partial and full view
 	// when DNA length gets to 10,000 it gets slow toggling between DNA and viewer
 	// format for full DNA
-	$scope.dnaSections = returnList(DNA,$scope.buffer,$scope.bucket);
+	$scope.dnaSections = returnList($scope.DNA,$scope.buffer,$scope.bucket);
 	// format for partial DNA viewing
-	$scope.partialSections = returnList(DNA,$scope.buffer,$scope.bucket);
+	$scope.partialSections = returnList($scope.DNA,$scope.buffer,$scope.bucket);
 	// dna base pairs per line
 	$scope.editStart = 0;
 	$scope.buffer = 50;
@@ -34,12 +34,12 @@ app.controller('myEditor',function($scope){
 	$scope.shownBlast = [];
 	// start and end points, but not for display, are 0 and 0 when the editor is displays full sequence
 	$scope.offsetStart = 0;
-	$scope.offsetEnd = DNA.length;
+	$scope.offsetEnd = $scope.DNA.length;
 
 
 	$scope.rowIndices = generateIndices(50, 10);
 	// allowance for spacing
-	$scope.sections =returnList(DNA, $scope.buffer, $scope.bucket);
+	$scope.sections =returnList($scope.DNA, $scope.buffer, $scope.bucket);
 	$scope.display = "default";
 	$scope.newRow = true;
 	// which strand we are currently editing, 0 or 1, first or second in a row 
@@ -268,23 +268,32 @@ app.controller('myEditor',function($scope){
 		let results = [];
 		let rowValue = "";
 		console.log("st, ", start,",",end, hfrom, hto);
-		let qcounter = $scope.editorBlastMatch.qfrom;
-
+		// let qcounter = $scope.editorBlastMatch.qfrom;
+		let qcounter = 0;
 		// if(start<$scope.editorBlastMatch.qfrom&& end>$scope.editorBlastMatch.qfrom){
 		// 	qcounter+=
 		// }
 		let counter = 0;
+
 		for(counter=start;counter<end;counter+=$scope.buffer){
 			console.log("st, ", start,",",end, hfrom, hto);
 			console.log("running", counter);
-			if(counter<hfrom){
+
+			// convert to
+			let index = counter;
+
+			if(counter<0){
+				index = counter+$scope.DNA.length;
+			}
+			// let index = counter>0 ? counter : counter+$scope.textbuffer.length;
+			if(index<hfrom){
 				// just beginnigg match site
 				// x<hfrom<x+bucket
-				if(hfrom<counter+$scope.buffer){
-					let matchedLength = counter+$scope.buffer - hfrom;
+				if(hfrom<index+$scope.buffer){
+					let matchedLength = index+$scope.buffer - hfrom;
 					console.log("row value is? ", rowValue, rowValue.length);
-					rowValue+=genSpace(hfrom-counter);
-					console.log("row value is? ", rowValue, rowValue.length, hfrom-counter);
+					rowValue+=genSpace(hfrom-index);
+					console.log("row value is? ", rowValue, rowValue.length, hfrom-index);
 					console.log("qseq? ", qseq.length, qseq);
 					rowValue+=qseq.substring(qcounter, qcounter+matchedLength);
 					console.log(qseq.length, "val of row ", qseq.substring(qcounter, qcounter+matchedLength))
@@ -301,11 +310,13 @@ app.controller('myEditor',function($scope){
 					results.push([])
 				}
 			}
-			// x>=hrom
+			// x>=hfrom
 			else{
-				qcounter = $scope.editorBlastMatch.qfrom+(counter-hfrom);
+				// qcounter = $scope.editorBlastMatch.qfrom+(index-hfrom);
+				qcounter = (index-hfrom);
+
 				console.log("MADE IT HERE");
-				if(counter<=hto){
+				if(index<=hto){
 					console.log($scope.editorBlastMatch.qfrom, $scope.editorBlastMatch.qto)
 					console.log("qcounter", qcounter, "q end", qcounter+$scope.buffer);
 					rowValue=qseq.substring(qcounter, qcounter+$scope.buffer);

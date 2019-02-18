@@ -35,7 +35,7 @@
                                 </div>
 
                                 <!-- positive strand blast match -->
-                                <div class="blastCompare" ng-show="blastSections.length!=0&& blastSections[$index].length!=0">
+                                <div class="blastCompare" ng-show="blastSections.length!=0&& blastSections[$index].length!=0&&editorBlastMatch.minus==false">
                                     <input id="{{$index}}blast" spellcheck="false" class="blastMatch" ng-model="blastSections[$index]" readonly>
 
                                 </div>
@@ -47,8 +47,7 @@
                                 <input id="{{$index}}row2" spellcheck="false" ng-click="startEditing($event)" ng-blur="saveToBuffer($index, row2)" ng-model="row[1]" ng-keydown="disable($event)" class="input" contenteditable ng-keyup="editSecondRow($index, $event)">
                                 
                                 <!-- negative strand blast match -->
-                                <div class="blastCompare" ng-show="blastSections.length!=0&& blastSections[$index].length!=0">
-                                    minus
+                                <div class="blastCompare" ng-show="blastSections.length!=0&& blastSections[$index].length!=0&&editorBlastMatch.minus==true">
                                     <input id="{{$index}}blast" spellcheck="false" class="blastMatch" ng-model="blastSections[$index]" readonly>
                                 </div>
                             </div>
