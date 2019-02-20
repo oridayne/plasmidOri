@@ -14,12 +14,9 @@ app.controller('myEditor',function($scope){
 	$scope.DNA = angular.element($("#divider")).scope().seq;
 	$scope.text="AACTGTATGCGGAAAAGGAGGCCAGTGCATCAGA";
 	$scope.textbuffer = $scope.DNA;
-	// these two variables are here to save overhead of toggling between partial and full view
-	// when DNA length gets to 10,000 it gets slow toggling between DNA and viewer
-	// format for full DNA
-	$scope.dnaSections = returnList($scope.DNA,$scope.buffer,$scope.bucket);
-	// format for partial DNA viewing
-	$scope.partialSections = returnList($scope.DNA,$scope.buffer,$scope.bucket);
+	$scope.blastOn = true;
+	
+
 	// dna base pairs per line
 	$scope.editStart = 0;
 	$scope.buffer = 50;
@@ -45,6 +42,9 @@ app.controller('myEditor',function($scope){
 	// which strand we are currently editing, 0 or 1, first or second in a row 
 	$scope.editing = 0;
 	$scope.lineDisplay = true;
+	$scope.showBlast = function(toggle){
+		$scope.blastOn = toggle;
+	}
 	$scope.setEditor = function(start, end, text){
 		console.log("called", start,end);
 		$scope.offsetStart = Math.min(start,end);

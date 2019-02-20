@@ -157,6 +157,7 @@ var app = angular.module('myApp', ['angularplasmid']);
           $scope.blastQuery = "";
           $scope.loading = false;
           $scope.hspList = [];
+          $scope.blastMatch = {};
         }
         $scope.blastQuery = "";
         $scope.loading = false;

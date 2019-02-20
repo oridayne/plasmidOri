@@ -11,3 +11,8 @@ plasmapper
  - amino acid alignment*
  - fix ORF clicking on opposite direction
  - fix clicking when there is no lenght to ORF arrow (clicking on ends...)
+ - reverse strand ORF checking
+ - blast editor off by one on clicking green line
+ - edge case when subject query has space mismatch
+ Blast Link: https://blast.ncbi.nlm.nih.gov/blast/BlastAlign.cgi?CMD=GET&RID=6T2PV47U114
+-think about hto - is it inclusive or exclusive?

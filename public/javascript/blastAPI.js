@@ -142,10 +142,11 @@ function parseHspObj(hsp){
 
 	// the blast API match index starts at 0, wheras in programming strings start at 1
 	// i will convert this to programming convention
+
 	obj.qfrom-=1;
-	obj.qto-=1;
+	// obj.qto-=1; -> this is inclusive
 	obj.hfrom-=1;
-	obj.hto-=1;
+	// obj.hto-=1;
 
 	// indices where query string does not match subject string 
 	obj.indexmismatch = [];
@@ -166,7 +167,7 @@ function parseHspObj(hsp){
 		let hseq = obj.hseq.substring(y, y+bucket);
 		
 		// hseq extension
-		
+
 
 
 		// basepair mismatch detection

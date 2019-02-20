@@ -15,7 +15,14 @@
                 <label class="container">Off
                   <input type="radio" name="linenumber" ng-click="switchLine('off')">
                 </label>
-
+                <span ng-show="blastSections.length!=0">
+                    <label class="container">Show Blast
+                        <input type="radio" checked="checked" name="blast" ng-click="showBlast(true)">
+                    </label>
+                    <label class="container">Hide Blast
+                        <input type="radio" name="blast" ng-click="showBlast(false)">
+                    </label>
+                </span>
             </span>
 
             <button id="saveButton" class="savedButton" ng-click="saveProgress()"><i class="far fa-save"></i></button>
@@ -35,7 +42,7 @@
                                 </div>
 
                                 <!-- positive strand blast match -->
-                                <div class="blastCompare" ng-show="blastSections.length!=0&& blastSections[$index]&&editorBlastMatch.minus==false">
+                                <div class="blastCompare" ng-show="blastSections.length!=0&& blastSections[$index]&&editorBlastMatch.minus==false &&blastOn">
                                     <input id="{{$index}}blast" spellcheck="false" class="blastMatch" ng-model="blastSections[$index]" readonly>
 
                                 </div>
@@ -47,7 +54,7 @@
                                 <input id="{{$index}}row2" spellcheck="false" ng-click="startEditing($event)" ng-blur="saveToBuffer($index, row2)" ng-model="row[1]" ng-keydown="disable($event)" class="input" contenteditable ng-keyup="editSecondRow($index, $event)">
                                 
                                 <!-- negative strand blast match -->
-                                <div class="blastCompare" ng-show="blastSections.length!=0&& blastSections[$index].length!=0&&editorBlastMatch.minus==true">
+                                <div class="blastCompare" ng-show="blastSections.length!=0&& blastSections[$index].length!=0&&editorBlastMatch.minus==true&&blastOn">
 
                                     <input id="{{$index}}blast" spellcheck="false" class="blastMatch" ng-model="blastSections[$index]" readonly>
 
