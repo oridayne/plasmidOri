@@ -1,0 +1,13 @@
+blasting against database?
+plasmapper
+ - plasmapper auto annotation?
+ list of common annotations to auto annotate?
+ checkboxes/ask which ones?
+
+
+ - single strand
+ - use <, > for strand indicaton
+ - highlighting/mismatch showing * - make this much easier to see
+ - amino acid alignment*
+ - fix ORF clicking on opposite direction
+ - fix clicking when there is no lenght to ORF arrow (clicking on ends...)

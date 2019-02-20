@@ -2,7 +2,7 @@
 
 var acceptedLetters = {"a":true, "g":true, "c":true, "t":true, "A":true, "G":true, "C":true, "T":true, " ":true};
 var acceptedKeys = {"Shift":true, "Backspace":true, "ArrowLeft":true, "ArrowRight":true, "Enter": true};
-var converter = {"A":"T", "T":"A", "G":"C", "C":"G", " ":" "};
+var converter = {"A":"T", "T":"A", "G":"C", "C":"G", " ":" ", "-":"-"};
 
 
 // TODO:
@@ -102,8 +102,10 @@ app.controller('myEditor',function($scope){
 				let label = (index*$scope.buffer)+subIndex;
 				// filler space
 				// 10(characters per bucket)
-				let numSpaces = genSpace(11- String(label).length); 
-				subIndices+=label+numSpaces;
+				let numSpaces = genSpace(7-String(label).length); 
+				// 4 spaces
+				// let numSpaces = genSpace(11- String(label).length); 
+				// subIndices+=label+numSpaces;
 			}
 			indices.push(subIndices);
 		}
@@ -179,7 +181,7 @@ app.controller('myEditor',function($scope){
 			console.log("now am here???");
 			newStr = editorScope.seq.substring(0,$scope.offsetStart)+$scope.textbuffer+editorScope.seq.substring($scope.offsetEnd);
 		}
-
+		// newStr = newStr.toUpperCase().replace(/-/g, '');
 		scope.seq = newStr;
 		$scope.offsetEnd = $scope.offsetStart+$scope.textbuffer.length;
 		scope.orfsFunc();
@@ -194,16 +196,20 @@ app.controller('myEditor',function($scope){
 		if(row==$scope.row1){
 			elt = document.getElementById(index);
 			newVal = elt.value.toUpperCase().replace(/\s/g, '');
+			// newVal = newVal.toUpperCase().replace(/-/g, '');
+
 		}
 		else{
 			elt = document.getElementById(index+"row2");
 			newVal = elt.value.toUpperCase().replace(/\s/g, '');
 			newVal = getCompStrand(newVal);
+			// newVal = newVal.toUpperCase().replace(/-/g, '');
+
 
 		}
 		let newText = $scope.textbuffer.substring(0,index*rowSize)+newVal+$scope.textbuffer.substring((index*rowSize)+rowSize);
 		$scope.textbuffer = newText;
-		$scope.sections = returnList($scope.textbuffer, $scope.buffer, $scope.bucket);
+		// $scope.sections = returnList($scope.textbuffer, $scope.buffer, $scope.bucket);
 
 	},
 	$scope.editSingleRow = function(event){
@@ -223,6 +229,7 @@ app.controller('myEditor',function($scope){
 		// save it
 		else{
 			$scope.saveToBuffer(index, $scope.row1);
+			$scope.sections = returnList($scope.textbuffer, $scope.buffer, $scope.bucket);
 		}
 	},
 	// edits second strand and update complementary
@@ -236,6 +243,8 @@ app.controller('myEditor',function($scope){
 		// save it
 		else{
 			$scope.saveToBuffer(index, $scope.row2);
+			$scope.sections = returnList($scope.textbuffer, $scope.buffer, $scope.bucket);
+
 		}
 	}
 	$scope.switchDisplay = function(style){
@@ -281,24 +290,16 @@ app.controller('myEditor',function($scope){
 		for(counter=start;counter<end;counter+=$scope.buffer){
 			// special case
 			if(counter<0&&counter+$scope.buffer>0){
-				// let partALen =
 				let partA = formatBlastHelper($scope.editorBlastMatch, counter+$scope.DNA.length, $scope.bucket, $scope.buffer);
 				let partB = formatBlastHelper($scope.editorBlastMatch, 0, $scope.bucket, $scope.buffer);
 				
 				if((partA.length==0||partA==-1) && partB.length>0){
 					partA = genSpace($scope.DNA.length-(counter+$scope.DNA.length))
-
-					console.log("space?", partA, partB, "st:", partA+partB)
 					segment = breakUpRow($scope.bucket, partA+partB);
-					console.log("SEGMENT IS", segment);
-					// segmentpartB;	
-
 				}
 				else{
-					console.log("partA", partA, partB)
 					segment = partA.concat(partB);
 				}
-				// console.log("partA", partA, "partB", partB);
 			}
 			else{
 				let index = counter>=0 ? counter : counter+$scope.DNA.length;
@@ -326,21 +327,12 @@ function formatBlastHelper(editorBlastMatch, index, bucket, buffer){
 	if(index<hfrom){
 		// just beginning match site
 		// x<hfrom<x+bucket
-		console.log("hfrom ", hfrom, index+buffer, hfrom<index+buffer)
 		if(hfrom<index+buffer){
 			let matchedLength = index+buffer - hfrom;
 			// console.log("row value is? ", rowValue, rowValue.length);
 			rowValue+=genSpace(hfrom-index);
-			console.log("row value is? ", rowValue, rowValue.length, hfrom-index);
-			console.log("qseq? ", qseq.length, qseq); 
 			rowValue+=qseq.substring(0, matchedLength);
-			console.log(qseq.length, "val of row ", qseq.substring(0, matchedLength))
-			console.log("qcounter, ", qcounter," matchedLength:", matchedLength, "hfrom: ", hfrom);
-
-			// console.log("val?",rowValue);
 			row = breakUpRow(bucket, rowValue);
-			rowValue = "";
-
 		}
 		// not at match site yet
 		else{
@@ -349,24 +341,16 @@ function formatBlastHelper(editorBlastMatch, index, bucket, buffer){
 	}
 	// x>=hfrom   
 	else{
-		// qcounter = $scope.editorBlastMatch.qfrom+(index-hfrom);
 		qcounter = (index-hfrom);
-
 		console.log("MADE IT HERE", "qcounter", qcounter, "index", index, "hfrom", hfrom, "hto", hto);
 		// hfrom<=x<=hto
 		if(index<=hto){
-			console.log(editorBlastMatch.qfrom, editorBlastMatch.qto)
-			console.log("qcounter", qcounter, "q end", qcounter+buffer);
 			rowValue=qseq.substring(qcounter, qcounter+buffer);
 			row = breakUpRow(bucket, rowValue);
-			console.log("value now",rowValue);
-			rowValue = "";
-
 		}
 		// done
 		else{
-			// break;
-			return -1;
+			row = -1;
 		}
 	}
 	return row;
@@ -380,7 +364,10 @@ function breakUpRow(bucket, text){
 	}
 	for(i=0;i<text.length;i+=bucket){
 		// console.log("in break up row?", i, text, bucket);
-		segments+=text.substring(i,i+bucket)+"    ";
+		// DENG: 4 space norm
+		// segments+=text.substring(i,i+bucket)+"    ";
+		segments+=text.substring(i,i+bucket)+" ";
+
 	}
 	return segments;
 }

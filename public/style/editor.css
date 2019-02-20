@@ -156,7 +156,10 @@
 .indiceItem{
 	/*outline: 1px solid blue;*/
 	/*margin-right: 1px;*/
-	width: 141px;
+	/*4 space*/
+	/*width: 141px;*/
+
+	width: 111px;
 	font-size: 16px;
 	letter-spacing: 0.5px;
 	padding-right: 0px;
@@ -170,11 +173,7 @@
 	text-transform:uppercase;
 	outline: none;
 	border: 0;
-	/*word-spacing: 2em;
-	letter-spacing: 1px;*/
-	
-
-	word-spacing: 30px;
+	/*word-spacing: 30px;*/
 	letter-spacing: 0.5px;
 
 
@@ -184,7 +183,7 @@
 }
 
 .textSpace{
-	word-spacing: 30px;
+	/*word-spacing: 30px;*/
  
 }
 

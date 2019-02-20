@@ -165,6 +165,10 @@ function parseHspObj(hsp){
 		let mid = obj.midline.substring(y, y+bucket);
 		let hseq = obj.hseq.substring(y, y+bucket);
 		
+		// hseq extension
+		
+
+
 		// basepair mismatch detection
 		let qincTemp = qfromCounter;
 		let hincTemp = hfromCounter;
@@ -175,7 +179,6 @@ function parseHspObj(hsp){
 			let curIndex = bp;
 			if(obj.qseq[curIndex]=="-"){continue;}
 			// if(obj.qseq[curIndex]!=obj.)
-
 
 		}
 
