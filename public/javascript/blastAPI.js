@@ -115,7 +115,7 @@ async function getHSPList(RID){
 * @return{obj} object version of it
 */
 function parseHspObj(hsp){
-	let bucket = 60;
+	let buffer = 60;
 	let obj = {}
 	obj.num = hsp.getElementsByTagName("Hsp_num")[0].innerHTML;
 	obj["bitscore"] = hsp.getElementsByTagName("Hsp_bit-score")[0].innerHTML;
@@ -144,7 +144,7 @@ function parseHspObj(hsp){
 	// i will convert this to programming convention
 
 	obj.qfrom-=1;
-	// obj.qto-=1; -> this is inclusive
+	// obj.qto-=1; -> this is inclusive, not substracting will make the endpoint exclusive (what we want)
 	obj.hfrom-=1;
 	// obj.hto-=1;
 
@@ -160,15 +160,11 @@ function parseHspObj(hsp){
 	let hfromCounter = obj.hfrom;
 
 
-	for(y=0;y<obj.qseq.length;y+=bucket){
+	for(y=0;y<obj.qseq.length;y+=buffer){
 
-		let qseq = obj.qseq.substring(y, y+bucket);
-		let mid = obj.midline.substring(y, y+bucket);
-		let hseq = obj.hseq.substring(y, y+bucket);
-		
-		// hseq extension
-
-
+		let qseq = obj.qseq.substring(y, y+buffer);
+		let mid = obj.midline.substring(y, y+buffer);
+		let hseq = obj.hseq.substring(y, y+buffer);
 
 		// basepair mismatch detection
 		let qincTemp = qfromCounter;
@@ -176,11 +172,12 @@ function parseHspObj(hsp){
 
 		// do we inc or dec the hit counter, depending on pos or neg strand match
 		let hinc = obj.minus ? -1 : 1;
-		for(bp = y;bp<y+bucket;bp++){
+		for(bp = y;bp<y+buffer;bp++){
 			let curIndex = bp;
-			if(obj.qseq[curIndex]=="-"){continue;}
-			// if(obj.qseq[curIndex]!=obj.)
-
+			if(obj.qseq[curIndex]!=obj.hseq[curIndex]){
+				obj.indexmismatch.push(curIndex);
+				console.log("mismatch", obj.qseq[curIndex], obj.hseq[curIndex]);
+			}
 		}
 
 		obj.leftIndices.push([qfromCounter, hfromCounter]);

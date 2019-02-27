@@ -193,6 +193,8 @@
 	border: none;
 	min-height: 300px;
 	margin-top: 10px;
+	text-transform: uppercase;
+
 }
 
 .blastHSP{

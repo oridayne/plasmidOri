@@ -51,8 +51,6 @@ app.controller('myEditor',function($scope){
 		$scope.offsetEnd = Math.max(start,end);
 		$scope.textbuffer = text;
 		$scope.sections = returnList(text, $scope.buffer, $scope.bucket);
-		$scope.formatBlast();
-
 	}
 
 	$scope.switchLine = function(style){
@@ -259,102 +257,9 @@ app.controller('myEditor',function($scope){
 
 	// is it possible for the query string to be larger????
 	$scope.blastSections = [];
-	// formats the blast match to match in the editor
-	$scope.formatBlast = function(){
-		console.log("calling formatBlast?", $scope.editorBlastMatch);
-		if(!$scope.editorBlastMatch.qseq){return;}
-		let hfrom = Math.min($scope.editorBlastMatch.hfrom, $scope.editorBlastMatch.hto);
-		let hto = Math.max($scope.editorBlastMatch.hfrom, $scope.editorBlastMatch.hto);
-		let qseq = $scope.editorBlastMatch.qseq;
-		console.log("qseq is--------------------!", qseq.length, qseq);
-		// TODO: what happens if negative indices are involved?????
-		// TODO: check for off by one errors?
-		// NOTE: blast api does not recognize that, huh!
-		//obj.hfrom, obj.hto
 
-		let start = Math.min($scope.offsetStart, $scope.offsetEnd);
-		let end = Math.max($scope.start, $scope.offsetEnd);
-		let results = [];
-		let rowValue = "";
-
-		console.log("st, ", start,",",end, hfrom, hto);
-		// let qcounter = $scope.editorBlastMatch.qfrom;
-		let qcounter = 0;
-		// if(start<$scope.editorBlastMatch.qfrom&& end>$scope.editorBlastMatch.qfrom){
-		// 	qcounter+=
-		// }
-		let counter = 0;
-		let segment = [];
-		// DENG: error case when start = -5 end = 21 , query # 2
-		// have to do special case
-		for(counter=start;counter<end;counter+=$scope.buffer){
-			// special case
-			if(counter<0&&counter+$scope.buffer>0){
-				let partA = formatBlastHelper($scope.editorBlastMatch, counter+$scope.DNA.length, $scope.bucket, $scope.buffer);
-				let partB = formatBlastHelper($scope.editorBlastMatch, 0, $scope.bucket, $scope.buffer);
-				
-				if((partA.length==0||partA==-1) && partB.length>0){
-					partA = genSpace($scope.DNA.length-(counter+$scope.DNA.length))
-					segment = breakUpRow($scope.bucket, partA+partB);
-				}
-				else{
-					segment = partA.concat(partB);
-				}
-			}
-			else{
-				let index = counter>=0 ? counter : counter+$scope.DNA.length;
-				segment =formatBlastHelper($scope.editorBlastMatch, index, $scope.bucket, $scope.buffer);
-			}
-			// poison pill, matching is finished
-			if(segment==-1){break;}
-			results.push(segment);
-
-		}
-		$scope.blastSections=results;
-
-		console.log("FINISHED---------", results);
-	}
 });
 
-
-function formatBlastHelper(editorBlastMatch, index, bucket, buffer){
-	let hfrom = Math.min(editorBlastMatch.hfrom, editorBlastMatch.hto);
-	let hto = Math.max(editorBlastMatch.hfrom, editorBlastMatch.hto);
-	let qseq = editorBlastMatch.qseq;
-	let qcounter = 0;
-	let row = [];
-	let rowValue="";
-	if(index<hfrom){
-		// just beginning match site
-		// x<hfrom<x+bucket
-		if(hfrom<index+buffer){
-			let matchedLength = index+buffer - hfrom;
-			// console.log("row value is? ", rowValue, rowValue.length);
-			rowValue+=genSpace(hfrom-index);
-			rowValue+=qseq.substring(0, matchedLength);
-			row = breakUpRow(bucket, rowValue);
-		}
-		// not at match site yet
-		else{
-			row = [];
-		}
-	}
-	// x>=hfrom   
-	else{
-		qcounter = (index-hfrom);
-		console.log("MADE IT HERE", "qcounter", qcounter, "index", index, "hfrom", hfrom, "hto", hto);
-		// hfrom<=x<=hto
-		if(index<=hto){
-			rowValue=qseq.substring(qcounter, qcounter+buffer);
-			row = breakUpRow(bucket, rowValue);
-		}
-		// done
-		else{
-			row = -1;
-		}
-	}
-	return row;
-}
 
 function breakUpRow(bucket, text){
 	let segments = "";

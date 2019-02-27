@@ -15,9 +15,6 @@ var app = angular.module('myApp', ['angularplasmid']);
         $scope.search = "";
         $scope.selected = "dna";
 
-        // search endpoints
-        $scope.selectedStart = false;
-        $scope.selectedEnd = false;
         $scope.searchResults = [];
 
         // highlight endpoints
@@ -34,34 +31,49 @@ var app = angular.module('myApp', ['angularplasmid']);
         $scope.minLength = 0;
         $scope.orfs = findAllORF($scope.seq, $scope.minLength);
 
-        // true or false if editor has text
-        $scope.hasText = true;
-        // sets editor here
+        $scope.blastQuery = "";
+
+        // indicator of when blast API results are loading
+        $scope.loading = false;
+
+        // start and end markers for indicating blast on plasmid svg
+        $scope.blastStart = 0;
+        $scope.blastEnd = 0;
+
+        // XML objects returned by blast API get request
+        $scope.hspList = [];
+
+        // request ID of blast request, returned by blast API post request
+        $scope.rid=false;
+        // sets editor paramters here
         $scope.changeEditor = function(start,end){
           let editorScope = angular.element($("#editorModule")).scope();
-          // TODO: figure out plus one scenario!
           editorScope.setEditor(start,end,$scope.seq.substring(start,end));
-          $scope.hasText = (start!=end);
         }
-        $scope.setSearchPoints = function(start,end){$scope.selectedStart=start; $scope.selectedEnd=end;};
+
+        // annotate plasmid
         $scope.setAnnotatePoints = function(start,end, name){$scope.annotateStart=start; $scope.annotateEnd=end; $scope.annotateName=name;};
+        
+        // toggles between views
         $scope.toggle = function(newSelected){toggle(newSelected)};
-        $scope.clear  = function(){
+
+        // clears search results 
+        $scope.clearSearch  = function(){
           $scope.search="";
           $scope.searchResults = [];
-          $scope.selectedStart=false;
-          $scope.selectedEnd=false;
           let editorScope = angular.element($("#editorModule")).scope();
           editorScope.setEditor(0,$scope.seq.length,$scope.seq);
           deactivateTitle();
           $scope.toggle("dna");
         }
 
+        // clicking on search highlight pulls up text editor of that search
         $scope.viewSearch = function(start,end){
           $scope.toggle('search');
-          $scope.setSearchPoints(start, end); 
           $scope.changeEditor(start,end);
         }
+
+        // function for searching the DNA
         $scope.searchDNA = function(){
           $scope.searchResults = [];
           $scope.search = $scope.search.toUpperCase();
@@ -97,6 +109,7 @@ var app = angular.module('myApp', ['angularplasmid']);
           $scope.changeEditor(start,end);
 
         };
+
         // reset highlighter
         $scope.reset = function(){
           $scope.start = 0;
@@ -104,8 +117,6 @@ var app = angular.module('myApp', ['angularplasmid']);
           $scope.toggle("dna"); 
           $scope.changeEditor(0,$scope.seq.length);
         };
-        // resets the search params
-        $scope.resetSearch = function(){$scope.selectedEnd = false;$scope.selectedStart = false;};
         // changes editor according to annotation
         $scope.focusAnnotation = function(start,end){
           $scope.changeEditor(start,end);
@@ -115,6 +126,10 @@ var app = angular.module('myApp', ['angularplasmid']);
           // allow for (Ctrl|Meta) c,v,z copy, paste, undo
           // for saving
           //disallow enter for single editor
+
+          if((event.ctrlKey==true||event.metaKey==true)){
+            return;
+          }
           if(event.key=="Enter"||event.key==" "){
             event.preventDefault();
             return;
@@ -125,7 +140,7 @@ var app = angular.module('myApp', ['angularplasmid']);
             return;
           }
         }
-              // removes the marker for the annotation, doesn't alter the sequence
+        // removes the marker for the annotation, doesn't alter the sequence
         $scope.removeAnnotation = function(start,end){
           for(x=0;x<$scope.annotations.length;x++){
             if($scope.annotations[x].start ==start&&$scope.annotations[x].end==end){
@@ -139,34 +154,52 @@ var app = angular.module('myApp', ['angularplasmid']);
         $scope.deleteAnnotation = function(start, end){
           deleteAnnotation(start,end);
         };
+
+        // recomputes orfs
         $scope.orfsFunc = function(){$scope.orfsdata=findAllORF($scope.seq, $scope.minLength);};
+
+        // list of all orfs
         $scope.orfsdata = findAllORF($scope.seq, $scope.minLength);
         $scope.editAnnotation = function(){editAnnotation()};
         $scope.submitAnnotation = function(){submitAnnotation();};
         $scope.deleteSequence = function(){deleteSequence();};
-        $scope.editName = function(){editName();};
+
+        // begin editing of annotation name
+        $scope.editAnnotationName = function(){submitAnnotationName();};
+
+        // submit editing of annotation names
         $scope.editKeys = function(e){editKeys(e)};
         $scope.editOrfMinLength = function(e){editOrfMinLength(e)};
         $scope.editInterval = function(e){editInterval(e)};
         $scope.viewORF = function(start,end){
           $scope.changeEditor(start,end+2);
         }
-        $scope.rid=false;
+
+        // removes blast marker from the plasmid svg
+        // resets blast editor, but not blast results
+        $scope.resetBlast = function(){
+          $scope.blastStart = 0;
+          $scope.blastEnd = 0;
+          let blastScope = angular.element($("#blastModule")).scope();
+          blastScope.editorBlastMatch = {};
+          blastScope.blastSections=[];
+          blastScope.textbuffer = "";
+        }
+
+        // clears blast results completely
         $scope.clearBlast = function(){
           $scope.rid = false;
           $scope.blastQuery = "";
           $scope.loading = false;
           $scope.hspList = [];
           $scope.blastMatch = {};
+          $scope.resetBlast();
         }
-        $scope.blastQuery = "";
-        $scope.loading = false;
+
+        // sets loading to true and awaits api call
         $scope.blastSequence = async function(){
-
-
           $scope.loading = true;
           let result = await BlastAlign($scope.blastQuery, $scope.seq);
-          console.log("blast query is", $scope.blastQuery);
           // TODO: what if the query fails?
           $scope.$apply(function () {
             $scope.rid = result;
@@ -177,30 +210,23 @@ var app = angular.module('myApp', ['angularplasmid']);
             $scope.loading = false;
 
           });
-          // $scope.rid = result;
-          console.log("this is the result", result);
-
         }
         $scope.blastMatch = {};
-        // $scope.hspList = [{"bitscore":300, "score":300, "expect": "test", "identities":150, "align":150, "gaps":0}];
         $scope.setBlast = function(blastObj){
           $scope.blastMatch = blastObj;
-          console.log("setting ")
-          let minStart = Math.min($scope.blastMatch.hfrom, $scope.blastMatch.hto);
-          let maxStart =  Math.max($scope.blastMatch.hfrom, $scope.blastMatch.hto);
-          $scope.blastMatch.hfrom = minStart;
-          $scope.blastMatch.hto = maxStart;
+          let start = Math.min($scope.blastMatch.hfrom, $scope.blastMatch.hto);
+          let end =  Math.max($scope.blastMatch.hfrom, $scope.blastMatch.hto);
+          $scope.blastStart=start;
+          $scope.blastEnd=end;
+          $scope.blastMatch.hfrom = start;
+          $scope.blastMatch.hto = end;
 
           console.log("blast match", blastObj);
-          let editorScope = angular.element($("#editorModule")).scope();
-          // I really should figure out how to inherit variables...
-          editorScope.editorBlastMatch = blastObj;
-        }
-        $scope.resetBlast = function(){
-          $scope.blastMatch = {};
-        }
-        $scope.hspList = [];
+          let blastScope = angular.element($("#blastModule")).scope();
+          blastScope.editorBlastMatch = blastObj;
+          blastScope.setEditor(start,end, blastObj.hseq);
 
+        }
         $scope.deactivateAllHsp = function(){
           let hsps = document.getElementsByClassName("blastHSP");
           for(x=0;x<hsps.length;x++){
@@ -208,7 +234,6 @@ var app = angular.module('myApp', ['angularplasmid']);
           }
         }
         $scope.activateHsp = function(index){
-          console.log("i am here!", index);
           $scope.deactivateAllHsp();
           document.getElementById("hsp"+index).classList.add("activeBlast");
           $scope.testToggle=index;
@@ -216,20 +241,21 @@ var app = angular.module('myApp', ['angularplasmid']);
 
     });
 
-// getBlast("5S0DJ4N6113");
+/*
+* Given a request ID, get the blast results associated with it
+* @param{int} start = start index within the sequence
+* @param{int} end - end index within the sequence
+* @param{event} event - event object on keydown
+*/
+// TODO: what happens if the request ID has not been computed yet/results are sitll computing
 async function getBlast(RID){
-  console.log('calling get blast!!!', RID);
-  // console.log("results are in!", results);
   var ann = angular.element($("#divider")).scope();
-  console.log("ann!!", ann.seq)
   let hspList = await getHSPList(RID);
-  console.log("hsp", hspList)
   ann.$apply(function(){
     ann.hspList = hspList;
   })
-
-  
 }
+
 
 /*
 * Removes focus on tabs title in the interface
@@ -281,13 +307,11 @@ function submitSequence(start,end, event){
    if(event.keyCode!=13){
     return;
   }
-  console.log(start,end);
   event.preventDefault();
   var scope = angular.element($("#divider")).scope();
   var seq = scope.seq;
   var ann = scope.annotations;
   var newStr = document.getElementById("sampleeditor").innerText;
-  console.log(newStr);
   if(start<0){
     let beg = newStr.substring(Math.abs(start));
     let mid = seq.substring(end, start+scope.seq.length);
@@ -504,8 +528,6 @@ function findAllORF(seq, minLength){
     }
     index = start+1;
   }
-  console.log("sorting???");
-
   // sort by orf length, easier for clicking on and rendering
   results.sort(function(a, b) {
     let x1 = Math.min(a[0], a[1]);
@@ -514,19 +536,18 @@ function findAllORF(seq, minLength){
     let y2 = Math.max(b[0],b[1]);
     return Math.abs(Math.abs(x1-x2) - Math.abs(y1-y2));
   });
-  console.log(results);
   return results;
 }
 
 
 // begin editing of annotation name
-function editName(){
+function editAnnotationName(){
   var name = document.getElementById("name");
   name.readOnly=false;
 }
 
 // finish editing of name
-function editKeys(e){
+function submitAnnotationName(e){
   var name = document.getElementById("name");
   var scope = angular.element($("#divider")).scope();
 
