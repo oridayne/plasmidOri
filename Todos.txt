@@ -31,3 +31,11 @@ plasmapper
  Blast Link: https://blast.ncbi.nlm.nih.gov/blast/BlastAlign.cgi?CMD=GET&RID=6T2PV47U114
 -think about hto - is it inclusive or exclusive?
 
+
+
+-----
+serialized file:
+text = DNA sequence
+interval
+minimum orf length
+annotations...

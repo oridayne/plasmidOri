@@ -42,9 +42,20 @@ app.controller('myEditor',function($scope){
 	// which strand we are currently editing, 0 or 1, first or second in a row 
 	$scope.editing = 0;
 	$scope.indiceDisplay = true;
+	// TODO: set plasmid name
+	$scope.downloadPlasmid = async function(){
+		let scope = angular.element($("#divider")).scope();
+		let annotations = scope.annotations; // list 
+		let interval = scope.interval;
+		let minLength = scope.minLength;
+		let DNA = scope.seq;
+		let downloadObj = {"dna": DNA, "interval": interval, "minLength": minLength, "annotations": annotations};
+		let objJSON = JSON.stringify(downloadObj);
+        let blob = new Blob([objJSON], {type: "text/plain;charset=utf-8"});
+        saveAs(blob, "hello world.txt");
+	}
 
 	$scope.setEditor = function(start, end, text){
-		console.log("called", start,end);
 		$scope.offsetStart = Math.min(start,end);
 		$scope.offsetEnd = Math.max(start,end);
 		$scope.textbuffer = text;
