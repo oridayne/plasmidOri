@@ -5,10 +5,9 @@
 }
 #p1 {
 	outline:1px solid #ccc; 
-	width: 500px; 
-	height: 500px;
+	width: 600px; 
+	height: 600px;
 	pointer-events: all;
-
 }
 
 #p1:hover{
@@ -41,6 +40,7 @@
 	font-weight:bold 
 }
 .markerhover{
+ 
   stroke: rgba(255,0,0,0);
   stroke-width: 2px;
 }
@@ -63,10 +63,12 @@
 
 
 .orfhover:hover {
-  /*stroke: #f00;*/
+  stroke: #f00;
   fill:red;
-  /*stroke-width: 2px;*/
+  stroke-width: 2px;
 }
+
+
 .markertick{
 	stroke:rgba(255,0,0,0);
 	stroke-width:2px;
@@ -99,3 +101,19 @@
 	stroke:rgba(255,0,0,0);
 	stroke-width:2px;
 }
+
+.labelhover:hover{
+	fill: red;
+}
+
+.lglabel {font-size:14px}
+.mdlabel {font-size:10px}
+.smlabel {font-size:8px}
+.labelline {stroke:#333;stroke-dasharray:2,2;stroke-width:2px;}
+.white {fill:#fff}
+.black {fill:#000}
+.red {fill:#c00}
+.blue {fill:#00c}
+.green {fill:#0c0}
+.gold {fill:#990}
+.gray {fill:#666}

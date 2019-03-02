@@ -1,8 +1,29 @@
+// TODO: programmatically update width and heights...
+// for draging text labels
+// also for dragging the highligher on pdraw
 window.onload = function(){
+
+var labels = d3.selectAll(".labelhover");
+
+labels.call(d3.behavior.drag()
+  .on('drag', function(){
+           d3.select(this)
+            .attr("x", d3.event.x)
+            .attr("y", d3.event.y);
+   // console.log("dragging text", d3.event);
+  })
+  .on('dragstart', function(){
+    console.log("drag started", d3.event);
+  })
+  );
+
+// create main svg
 var tau = 2 * Math.PI;
+var svgh = 600;
+var svgw=600;
 var w = 500
   , h = 500
-  , cx = w/2, cy = h/2
+  , cx = svgw/2, cy = svgh/2
   , strokeColor = "rgba(0,128,0,0.2)" //color of circle and drag
 
   // variable for arc
@@ -24,15 +45,15 @@ var w = 500
 
   // create main svg
 var svg = d3.select("#p1").append("svg:svg")
-  .attr("width", w)
-  .attr("height", h)
+  .attr("width", svgw)
+  .attr("height", svgh)
   .attr("id", "clock");
 
 // create arc group
 var arcGroup = svg.append("svg:g")
   .attr(
     "transform", 
-    "translate(" + w / 2 + "," + h / 2 + ")");
+    "translate(" + cx + "," + cy + ")");
 
 // create arc object (not display in svg,
 // but use as data of path)
@@ -68,7 +89,7 @@ var base = arcGroup.append("path")
   .datum({ endAngle: tau, startAngle:arcStartAngle })
   .style("fill", "rgba(0,128,0,0)")
   .attr("stroke", "black")
-  .attr("stroke-width", 0.0)
+  .attr("stroke-width",.0)
   .attr("cursor", "crosshair")
   .attr("d", arc)
   .call(d3.behavior.drag()

@@ -4,10 +4,10 @@
             <span ng-show="display=='default'">
                 Line Number:
                 <label class="container">On
-                  <input type="radio" checked="checked" name="linenumberBlast" ng-click="switchLine('on')">
+                  <input type="radio" checked="checked" name="linenumberBlast" ng-click="toggleIndice(true)">
                 </label>
                 <label class="container">Off
-                  <input type="radio" name="linenumberBlast" ng-click="switchLine('off')">
+                  <input type="radio" name="linenumberBlast" ng-click="toggleIndice(false)">
                 </label>
 
             </span>
@@ -21,7 +21,7 @@
                     <div ng-repeat="row in sections  track by $index"  id="rowWrapper{{$index}}"  ng-init="$last && finished()">
                         <p>
                             <div class="rowwrapper">
-                                <div class="indiceWrapper" ng-show="lineDisplay">   
+                                <div class="indiceWrapper" ng-show="indiceDisplay">   
                                     <div  ng-repeat="indice in rowIndices">
                                        <div class="indiceItem">{{$parent.$index*buffer+indice+offsetStart}}</div>
                                     </div>

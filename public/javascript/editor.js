@@ -2,20 +2,19 @@
 
 var acceptedLetters = {"a":true, "g":true, "c":true, "t":true, "A":true, "G":true, "C":true, "T":true, " ":true};
 var acceptedKeys = {"Shift":true, "Backspace":true, "ArrowLeft":true, "ArrowRight":true, "Enter": true};
-var converter = {"A":"T", "T":"A", "G":"C", "C":"G", " ":" ", "-":"-"};
+var converter = {"A":"T", "T":"A", "G":"C", "C":"G", " ":" "};
 
 
 // TODO:
 // - move cursor to end upon enter 
 // optimated toggle between full and partial editor
 // disallow editing for annotation
+// what happens when the user tries to paste in junk?
 
 app.controller('myEditor',function($scope){
 	$scope.DNA = angular.element($("#divider")).scope().seq;
 	$scope.text="AACTGTATGCGGAAAAGGAGGCCAGTGCATCAGA";
-	$scope.textbuffer = $scope.DNA;
-	$scope.blastOn = true;
-	
+	$scope.textbuffer = $scope.DNA;	
 
 	// dna base pairs per line
 	$scope.editStart = 0;
@@ -39,12 +38,11 @@ app.controller('myEditor',function($scope){
 	$scope.sections =returnList($scope.DNA, $scope.buffer, $scope.bucket);
 	$scope.display = "default";
 	$scope.newRow = true;
+
 	// which strand we are currently editing, 0 or 1, first or second in a row 
 	$scope.editing = 0;
-	$scope.lineDisplay = true;
-	$scope.showBlast = function(toggle){
-		$scope.blastOn = toggle;
-	}
+	$scope.indiceDisplay = true;
+
 	$scope.setEditor = function(start, end, text){
 		console.log("called", start,end);
 		$scope.offsetStart = Math.min(start,end);
@@ -53,12 +51,13 @@ app.controller('myEditor',function($scope){
 		$scope.sections = returnList(text, $scope.buffer, $scope.bucket);
 	}
 
-	$scope.switchLine = function(style){
-		$scope.lineDisplay=(style=="on");
+	$scope.toggleIndice = function(toggle){
+		$scope.indiceDisplay=toggle;
 	}
 	// for every newly rendered row in the editor, set the cursor to the end
 	// also executed when user creates new row by entering in base pairs
 	$scope.finished = function() {
+		//TODO: newRow doesn't so anything, can we limit how many times this is called?
 		if(!$scope.newRow){
 			return;
 		}
@@ -69,16 +68,21 @@ app.controller('myEditor',function($scope){
 		$scope.setSelectionRange(inputTarget, inputTarget.value.length,inputTarget.value.length);
     };
 
+    // change editor outline to blue to indicate unsaved changes/starting editing
     $scope.startEditing = function(event){
     	document.getElementById("dnaWrapper").className = "unsaved";
     	document.getElementById("saveButton").className = "unsavedButton";
     },
+
+    // same as above, except for single editor
     $scope.startEditingSingle = function(event){
     	let elt = event.srcElement;
 		document.getElementById("saveButton").className = "unsavedButton";
     	elt.classList.remove("saved");
     	elt.classList.add("unsaved");
     }
+
+    // show that editor is saved by removing blue border
     $scope.stopEditingSingle = function(event){
     	let elt = event.srcElement;
     	elt.classList.remove("unsaved");
@@ -86,6 +90,7 @@ app.controller('myEditor',function($scope){
     	document.getElementById("saveButton").className = "savedButton";
     }
 
+    // formats DNA to be copied, along with indices
 	$scope.copyDNA = function(){
 		const el = document.createElement('textarea');
 		el.className = "single"; 
@@ -93,23 +98,29 @@ app.controller('myEditor',function($scope){
 		let indices = [];
 		let subIndices = "";	
 
-		// generating indices	
-		for(index=0;index<$scope.sections.length;index++){
-			subIndices = "";
-			for(subIndex=0;subIndex<$scope.buffer;subIndex+=$scope.bucket){
-				let label = (index*$scope.buffer)+subIndex;
-				// filler space
-				// 10(characters per bucket)
-				let numSpaces = genSpace(7-String(label).length); 
-				// 4 spaces
-				// let numSpaces = genSpace(11- String(label).length); 
-				// subIndices+=label+numSpaces;
+		if($scope.indiceDisplay){
+			// generating indices	
+			// row
+			for(index=0;index<$scope.sections.length;index++){
+				subIndices = "";
+				// by bucket
+				for(subIndex=0;subIndex<$scope.buffer;subIndex+=$scope.bucket){
+					let label = (index*$scope.buffer)+subIndex;
+					// filler space
+					// 10(characters per bucket)
+					// yes, 11 is a weird number, but this determines spacing in between indices
+				    let numSpaces =  ' '.repeat(11-String(label).length)
+					subIndices+=label+numSpaces;
+				}
+				indices.push(subIndices);
 			}
-			indices.push(subIndices);
 		}
+
 		// putting it all together
 		for(x=0;x<$scope.sections.length;x++){
-			val+=indices[x]+"\n";
+			if($scope.indiceDisplay){
+				val+=indices[x]+"\n";
+			}
 			val+=$scope.sections[x][0];
 			val+="\n";
 			val+=$scope.sections[x][1];
@@ -185,7 +196,7 @@ app.controller('myEditor',function($scope){
 		scope.orfsFunc();
 	}
 
-	// on a row blue, save to temporary buffer
+	// save a row to the temporary buffer
 	$scope.saveToBuffer = function(index, row){
 		console.log("save to buffer called!", index, row);
 		let rowSize = $scope.buffer;
@@ -194,15 +205,11 @@ app.controller('myEditor',function($scope){
 		if(row==$scope.row1){
 			elt = document.getElementById(index);
 			newVal = elt.value.toUpperCase().replace(/\s/g, '');
-			// newVal = newVal.toUpperCase().replace(/-/g, '');
-
 		}
 		else{
 			elt = document.getElementById(index+"row2");
 			newVal = elt.value.toUpperCase().replace(/\s/g, '');
 			newVal = getCompStrand(newVal);
-			// newVal = newVal.toUpperCase().replace(/-/g, '');
-
 
 		}
 		let newText = $scope.textbuffer.substring(0,index*rowSize)+newVal+$scope.textbuffer.substring((index*rowSize)+rowSize);
@@ -276,15 +283,12 @@ function breakUpRow(bucket, text){
 	}
 	return segments;
 }
-
-function genSpace(num){
-	let spaces = "";
-	for(x=0;x<num;x++){
-		spaces+=" ";
-	}
-	return spaces;
-}
-
+/*
+* Helper funciton to generating indices in this editor
+* @param{int} buffer - base pairs per row
+* @param{int} bucket - number of bp per segment in a row, bucket<buffer
+* @return {[int,...]} complementary strand
+*/
 function generateIndices(buffer, bucket){
 	let result = [];
 	for(x=0;x<buffer;x+=bucket){
@@ -292,25 +296,40 @@ function generateIndices(buffer, bucket){
 	}
 	return result;
 }
-// returns comp strand 
+
+
+/*
+* Given a DNA strand, return the complementary
+* @param{string} DNA strand
+* @return complementary strand
+*/
 function getCompStrand(strand){
 	let comp = "";
 	for(i=0;i<strand.length;i++){
-		comp+=converter[strand[i]];
+		// anything not valid in a DNA strand is not added
+		if(converter[strand[i]]){
+			comp+=converter[strand[i]];
+		}
 	}
 	return comp;
 }
 
-// returns complementary strand for rendering 
+/*
+* Format DNA text to fit double stranded editor
+* DNA is split by row and segmented per row
+* @param{string} text = DNA input to format
+* @param{int} buffer - base pairs per row
+* @param{int} bucket - a row is split into buckets. There is one space after {bucket}dna base pairs
+* @return [[strand, comp strand],..... ]
+*/
 function returnList(text, buffer, bucket){
 	let result = [];
-
 	for(x=0;x<text.length;x+=buffer){
 		let strand = "";
 		for(y=x;y<x+buffer;y+=bucket){
 			let seg = text.substring(y, y+bucket); 
 			strand+=seg;
-			// add space to everything but the last 
+			// add space to every bucket but the last 
 			if(seg.length==bucket){
 				if((y+seg.length)%buffer!=0){
 					strand+=" ";
@@ -318,6 +337,7 @@ function returnList(text, buffer, bucket){
 			}
 		}
 		threeFive = strand;
+		// add complementary stand
 		let fiveThree=getCompStrand(threeFive);		
 		result.push([threeFive,  fiveThree]);
 	}

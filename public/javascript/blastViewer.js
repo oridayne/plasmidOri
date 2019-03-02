@@ -11,10 +11,8 @@ var converter = {"A":"T", "T":"A", "G":"C", "C":"G", " ":" ", "-":"-"};
 app.controller('blastViewer',function($scope){
 	$scope.DNA = angular.element($("#divider")).scope().seq;
 	$scope.textbuffer = $scope.DNA;
-	$scope.singletextbuffer = $scope.DNA;
 	$scope.blastOn = true;
 	
-
 	// dna base pairs per line
 	$scope.buffer = 50;
 	$scope.bucket = 10;
@@ -29,20 +27,21 @@ app.controller('blastViewer',function($scope){
 	$scope.offsetStart = 0;
 	$scope.offsetEnd = $scope.DNA.length;
 
-
 	$scope.rowIndices = generateIndices(50, 10);
 	// allowance for spacing
 	$scope.sections =returnList($scope.DNA, $scope.buffer, $scope.bucket);
 	$scope.display = "default";
-	$scope.newRow = true;
+
 	// which strand we are currently editing, 0 or 1, first or second in a row 
 	$scope.editing = 0;
-	$scope.lineDisplay = true;
+
+	// whether or not to display indices
+	$scope.indiceDisplay = true;
+
 	$scope.showBlast = function(toggle){
 		$scope.blastOn = toggle;
 	}
 	$scope.setEditor = function(start, end, text){
-		console.log("called", start,end);
 		$scope.offsetStart = Math.min(start,end);
 		$scope.offsetEnd = Math.max(start,end);
 		$scope.textbuffer = text;
@@ -50,35 +49,42 @@ app.controller('blastViewer',function($scope){
 		$scope.formatBlast();
 
 	}
-
-	$scope.switchLine = function(style){
-		$scope.lineDisplay=(style=="on");
+	// toggle indice Display
+	$scope.toggleIndice = function(toggle){
+		$scope.indiceDisplay=toggle;
 	}
 
+	// TODO: if most people do not like copying the indices with it, this can be expedited...
 	$scope.copyDNA = function(){
+
 		const el = document.createElement('textarea');
 		el.className = "single"; 
 		let val = "";
 		let indices = [];
 		let subIndices = "";	
 
-		// generating indices	
-		for(index=0;index<$scope.sections.length;index++){
-			subIndices = "";
-			for(subIndex=0;subIndex<$scope.buffer;subIndex+=$scope.bucket){
-				let label = (index*$scope.buffer)+subIndex;
-				// filler space
-				// 10(characters per bucket)
-				let numSpaces = genSpace(7-String(label).length); 
-				// 4 spaces
-				// let numSpaces = genSpace(11- String(label).length); 
-				// subIndices+=label+numSpaces;
+		// copy indices if the user wants to
+		if($scope.indiceDisplay){
+			// generating indices	
+			for(index=0;index<$scope.sections.length;index++){
+				subIndices = "";
+				for(subIndex=0;subIndex<$scope.buffer;subIndex+=$scope.bucket){
+					let label = (index*$scope.buffer)+subIndex;
+					// filler space
+					// 10(characters per bucket)
+					let numSpaces = genSpace(11- String(label).length); 
+					subIndices+=label+numSpaces;
+				}
+				indices.push(subIndices);
 			}
-			indices.push(subIndices);
+
 		}
+
 		// putting it all together
 		for(x=0;x<$scope.sections.length;x++){
-			val+=indices[x]+"\n";
+			if($scope.indiceDisplay){
+				val+=indices[x]+"\n";
+			}
 			val+=$scope.sections[x][0];
 			val+="\n";
 			val+=$scope.sections[x][1];
@@ -95,15 +101,8 @@ app.controller('blastViewer',function($scope){
 		$scope.display = style;
 		// back to double strand
 		if(style=="default"){
-			$scope.textbuffer = $scope.singletextbuffer.toUpperCase();
-
 			$scope.sections =returnList($scope.textbuffer, $scope.buffer, $scope.bucket);
 		}
-		// single strand
-		else{
-			// $scope.singletextbuffer = 
-		}
-
 	}
 
 	// formats the blast match to match in the editor

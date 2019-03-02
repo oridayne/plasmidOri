@@ -14,7 +14,9 @@ var app = angular.module('myApp', ['angularplasmid']);
         $scope.seq = testStr;
         $scope.search = "";
         $scope.selected = "dna";
-
+        $scope.testing = function(e){
+          console.log("ive been clicked!", e);
+        }
         $scope.searchResults = [];
 
         // highlight endpoints
@@ -161,11 +163,11 @@ var app = angular.module('myApp', ['angularplasmid']);
         // list of all orfs
         $scope.orfsdata = findAllORF($scope.seq, $scope.minLength);
         $scope.editAnnotation = function(){editAnnotation()};
-        $scope.submitAnnotation = function(){submitAnnotation();};
+        $scope.submitAnnotationName = function(event){submitAnnotationName(event);};
         $scope.deleteSequence = function(){deleteSequence();};
 
         // begin editing of annotation name
-        $scope.editAnnotationName = function(){submitAnnotationName();};
+        $scope.editAnnotationName = function(event){editAnnotationName(event);};
 
         // submit editing of annotation names
         $scope.editKeys = function(e){editKeys(e)};
@@ -541,16 +543,17 @@ function findAllORF(seq, minLength){
 
 
 // begin editing of annotation name
-function editAnnotationName(){
-  var name = document.getElementById("name");
+function editAnnotationName(event){
+  console.log(event, "event!")
+  // var name = document.getElementById("name");
+  let name = event.srcElement;
   name.readOnly=false;
 }
 
 // finish editing of name
 function submitAnnotationName(e){
-  var name = document.getElementById("name");
+  let name = e.srcElement;
   var scope = angular.element($("#divider")).scope();
-
   if(e.keyCode==13){
     e.preventDefault();
     name.blur(); 

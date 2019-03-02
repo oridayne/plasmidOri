@@ -10,3 +10,24 @@ TODOS:
 - error handling for bad blast cases - job still pending, etc
 - lag issues when getting blast results
 - put back in controller for highligher
+
+
+blasting against database?
+plasmapper
+ - plasmapper auto annotation?
+ list of common annotations to auto annotate?
+ checkboxes/ask which ones?
+
+
+ - single strand
+ - use <, > for strand indicaton
+ - highlighting/mismatch showing * - make this much easier to see
+ - amino acid alignment*
+ - fix ORF clicking on opposite direction
+ - fix clicking when there is no lenght to ORF arrow (clicking on ends...)
+ - reverse strand ORF checking
+ - blast editor off by one on clicking green line
+ - edge case when subject query has space mismatch
+ Blast Link: https://blast.ncbi.nlm.nih.gov/blast/BlastAlign.cgi?CMD=GET&RID=6T2PV47U114
+-think about hto - is it inclusive or exclusive?
+
