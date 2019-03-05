@@ -5,7 +5,8 @@
  */
 const app = require('../app');
 const http = require('http');
-
+const database = require('../database');
+database.createTables();
 /**
  * Normalize a port into a number, string, or false.
  */

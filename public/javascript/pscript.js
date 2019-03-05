@@ -14,6 +14,7 @@ var app = angular.module('myApp', ['angularplasmid']);
         $scope.seq = testStr;
         $scope.search = "";
         $scope.selected = "dna";
+        $scope.plasmidName = "plasmid";
         $scope.testing = function(e){
           console.log("ive been clicked!", e);
         }

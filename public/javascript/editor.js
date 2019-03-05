@@ -48,11 +48,12 @@ app.controller('myEditor',function($scope){
 		let annotations = scope.annotations; // list 
 		let interval = scope.interval;
 		let minLength = scope.minLength;
+		let plasmidName = scope.plasmidName;
 		let DNA = scope.seq;
-		let downloadObj = {"dna": DNA, "interval": interval, "minLength": minLength, "annotations": annotations};
+		let downloadObj = {"dna": DNA, "name": plasmidName,"interval": interval, "minLength": minLength, "annotations": annotations};
 		let objJSON = JSON.stringify(downloadObj);
         let blob = new Blob([objJSON], {type: "text/plain;charset=utf-8"});
-        saveAs(blob, "hello world.txt");
+        saveAs(blob, plasmidName+".txt");
 	}
 
 	$scope.setEditor = function(start, end, text){
