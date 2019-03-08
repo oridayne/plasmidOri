@@ -18,6 +18,11 @@ router.get('/', (req, res) => {
 });
 
 /* GET home page. */
+router.get('/boros', (req, res) => {
+  res.render('boros', { title: 'Ouroboros'});
+});
+
+/* GET home page. */
 router.get('/edit', (req, res) => {
   res.render('index', { title: 'plasmid'});
 });

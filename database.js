@@ -13,16 +13,27 @@ class Database {
     });
   }
 
-  query(sql, params=[]) {
+  run(sql, params=[]){
     return new Promise((resolve, reject) => {
-
       this.db.run(sql,params, function(err){
         if(err){
-          console.log("Error running sql " + sql)
           console.log(err)
           reject(err)
         }else{
-          resolve({id:this.lastID})
+          resolve(this)
+        }
+      })
+    });
+  }
+
+  query(sql, params=[]) {
+    return new Promise((resolve, reject) => {
+      this.db.all(sql,params, function(err, rows){
+        if(err){
+          console.log(err)
+          reject(err)
+        }else{
+          resolve(rows)
         }
       })
     });
@@ -80,13 +91,14 @@ class Database {
      // create plasmids table
      try{
       const sql = `CREATE TABLE IF NOT EXISTS plasmids (
+                   uuid TEXT NOT NULL, 
                    username TEXT NOT NULL,
                    sequence TEXT NOT NULL,
-                   plasmidName TEXT NOT NULL,
+                   plasmidName TEXT,
                    interval INT,
                    minLength, INT,
                    annotations TEXT NOT NULL,
-                   PRIMARY KEY (username, plasmidName),
+                   PRIMARY KEY (uuid),
                    FOREIGN KEY (username) REFERENCES users (username) 
                    ON DELETE CASCADE ON UPDATE NO ACTION
                   )`

@@ -52,6 +52,8 @@ app.controller('myEditor',function($scope){
 		let DNA = scope.seq;
 		let downloadObj = {"dna": DNA, "name": plasmidName,"interval": interval, "minLength": minLength, "annotations": annotations};
 		let objJSON = JSON.stringify(downloadObj);
+		let test = JSON.stringify(annotations);
+		console.log("new annotations", test);
         let blob = new Blob([objJSON], {type: "text/plain;charset=utf-8"});
         saveAs(blob, plasmidName+".txt");
 	}

@@ -1,0 +1,11 @@
+.boros{
+	outline:1px solid #ccc; 
+	width: 150px; 
+	height: 150px;
+	pointer-events: all;
+}
+
+.track{
+ 	fill:#f0f0f0;
+ 	stroke:#ccc;
+ }

@@ -1,6 +1,5 @@
 const database = require('../database');
-const sqlite = require('sqlite');
-
+const sqlite = require('sqlite3').verbose();
 /**
  * @typedef User
  * @prop {string} username - username of user
@@ -21,10 +20,12 @@ class Users {
    */
   static async addOneUser(username, password) {
     try {
-      const safeUser = sqlite.escape(username);
-      const safePassword = sqlite.escape(password);
-      const sql = `INSERT INTO users (username, password) VALUES (${safeUser}, ${safePassword});`;
-      const response = await database.query(sql);
+      const safeUser = escape(username);
+      const safePassword = escape(password);
+      // const sql = `INSERT INTO users (username, password) VALUES (${safeUser}, ${safePassword});`;
+      const sql = `INSERT INTO users (username, password) VALUES (?, ?);`;
+      const response = await database.query(sql, [username, password]);
+      console.log("created user!", response);
       return response;
     } catch (error) {
       throw error;
@@ -38,9 +39,8 @@ class Users {
    */
   static async findOneUser(username) {
     try {
-      const safeUser = sqlite.escape(username);
-      const sql = `SELECT * FROM users WHERE username=${safeUser};`;
-      const response = await database.query(sql);
+      const sql = `SELECT * FROM users WHERE username=(?);`;
+      const response = await database.query(sql, [username]);
       return response;
     } catch (error) {
       throw error;
@@ -69,10 +69,8 @@ class Users {
    */
   static async updateUsernameOneUser(currentUsername, newUsername) {
     try {
-      const safeCurrentUser = sqlite.escape(currentUsername);
-      const safeNewUser = sqlite.escape(newUsername);
-      const sql = `UPDATE users SET username=${safeNewUser} WHERE username=${safeCurrentUser};`;
-      const response = await database.query(sql);
+      const sql = `UPDATE users SET username=(?) WHERE username=(?);`;
+      const response = await database.query(sql, [currentUsername, newUsername]);
       return response;
     } catch (err) { throw err; }
   }
@@ -85,10 +83,8 @@ class Users {
    */
   static async updatePasswordOneUser(currentUsername, newPassword) {
     try {
-      const safeCurrentUser = sqlite.escape(currentUsername);
-      const safeNewPassword = sqlite.escape(newPassword);
-      const sql = `UPDATE users SET password=${safeNewPassword} WHERE username=${safeCurrentUser};`;
-      const response = await database.query(sql);
+      const sql = `UPDATE users SET password=(?) WHERE username=(?);`;
+      const response = await database.query(sql, [newPassword, currentUsername]);
       return response;
     } catch (err) { throw err; }
   }
@@ -100,9 +96,8 @@ class Users {
    */
   static async deleteOneUser(username) {
     try {
-      const safeUser = sqlite.escape(username);
-      const sql = `DELETE FROM users WHERE username=${safeUser};`;
-      const response = await database.query(sql);
+      const sql = `DELETE FROM users WHERE username=(?);`;
+      const response = await database.query(sql, [username]);
       return response;
     } catch (err) { throw err; }
   }
