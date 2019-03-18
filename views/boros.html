@@ -10,28 +10,38 @@
         <script src="javascript/service/plasmidService.js" type="text/javascript"></script>
         <script src="javascript/service/userService.js" type="text/javascript"></script>
         <script src="javascript/boros.js" type="text/javascript"></script>
+        <script src="javascript/navigator.js" type="text/javascript"></script>
+
         <link rel="stylesheet" href="style/pstyle.css">
         <link rel="stylesheet" href="style/ppage.css">
         <link rel="stylesheet" href="style/boros.css">
-
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
     </head>
     <body ng-app="plasmidGroup" >
 
         <div id="navbar">
             <div class="navItem">Home</div>
             <div class="navItem">About</div>
-            <div class="navItem">Donuts</div>
+            <div class="navItem" id="borosNav" onclick="toBoros()">Boroi</div>
             <div class="navItem">Upload</div>
+            <div onclick="newBlankPlasmid()" class="navItem">+ New </div>
         </div>
         
         <div  ng-controller="borosCtrl"id="plasmidViewer" >
-            <div ng-repeat="n in plasmidList">
-                <plasmid id='a1' class="boros" sequencelength='200'>
-                    <plasmidtrack class="track"  radius="50" width="10"  id='b1' transform="translate(-75,-75)">
-                        <trackscale  id="innerticks" class='smajor' interval='10' showlabels='0' labelclass='sml'></trackscale>
-                    </plasmidtrack>
-                </plasmid>
-                {{n.plasmidName}}
+            <div id="plasmidWrapper">
+                <div class="plasmidItem" ng-repeat="n in plasmidList" id='n.uuid'>
+                    
+                    <!-- {{n.annotations}} -->
+                    <plasmid  ng-click="focusPlasmid(n.uuid); selectPlasmid(n.uuid)" id={{n.uuid}} class="boros" sequencelength={{n.sequence.length}}>
+                        <plasmidtrack class="track"  radius="50" width="10"  transform="translate(-75,-75)">
+                            <trackscale  id="innerticks" class='smajor' interval='10' showlabels='0' labelclass='sml'></trackscale>
+                            <trackmarker  class="highlight" ng-repeat='x in n.annotations' start='{{x.start}}' end='{{x.end}}'>
+                        </plasmidtrack>
+                    </plasmid>
+                    
+                    <!-- {{n.annotations.length}} -->
+                    <div><div ng-click="focusPlasmid(n.uuid); selectPlasmid(n.uuid)">{{n.plasmidName}}</div> <div><i ng-click="deletePlasmid(n.uuid);"class="fa fa-trash delete" aria-hidden="true"></i></div></div>
+                </div>
             </div>
         </div>
 

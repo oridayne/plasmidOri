@@ -22,6 +22,7 @@ var app = angular.module('myApp', ['angularplasmid']);
         $scope.testing = function(e){
           console.log("ive been clicked!", e);
         }
+        $scope.plasmidID = false;
         $scope.searchResults = [];
 
         // highlight endpoints
@@ -32,7 +33,7 @@ var app = angular.module('myApp', ['angularplasmid']);
         $scope.annotateStart = false;
         $scope.annotateEnd = false;
         $scope.annotateName = "default";
-        $scope.annotations = [{start:5, end:7, name:"Annotated Frame"}];
+        $scope.annotations = [{start:5, end:7, name:"Annotated Frame", annotationSeq:""}];
         // plasmid attributes
         $scope.interval = Math.floor(Math.max($scope.seq.length/30, 1));
         $scope.minLength = 0;
@@ -126,6 +127,7 @@ var app = angular.module('myApp', ['angularplasmid']);
         };
         // changes editor according to annotation
         $scope.focusAnnotation = function(start,end){
+          console.log("here!", start, end);
           $scope.changeEditor(start,end);
         }
           // disable typing in anything a g c t, shift, arrowLeft, arrowRight, Backspace
@@ -163,7 +165,8 @@ var app = angular.module('myApp', ['angularplasmid']);
         };
 
         // recomputes orfs
-        $scope.orfsFunc = function(){$scope.orfsdata=findAllORF($scope.seq, $scope.minLength);};
+        $scope.orfsFunc = function(){$scope.orfsdata=findAllORF($scope.seq, $scope.minLength);
+          console.log("loading in orfs, ", $scope.orfsdata)};
 
         // list of all orfs
         $scope.orfsdata = findAllORF($scope.seq, $scope.minLength);
@@ -249,15 +252,81 @@ var app = angular.module('myApp', ['angularplasmid']);
     });
 
 
+// testing 
+// 52d7d8b2-0392-4b12-939c-74d85741a17b
+// 9f48a0b6-8866-43c2-a815-5054c8b7200c plasmid1
+async function getSpecificPlasmid(plasmidID){
+  let plasmid = await loadSpecificPlasmid(plasmidID);
+  console.log("this plasmid is ", plasmid);
+  if(plasmid.response){
+    console.log("in this place");
+    let uuid = plasmid.response[0].uuid;
+    let plasmidName = plasmid.response[0].plasmidName;
+    let interval = plasmid.response[0].interval;
+    let minLength = plasmid.response[0].minLength;
+    let annotations = JSON.parse(plasmid.response[0].annotations);
+    let sequence = plasmid.response[0].sequence;
+    var scope = angular.element($("#divider")).scope();
+     
+    scope.$apply(function(){
+      scope.plasmidID = uuid;
+      scope.plasmidName = plasmidName;
+      scope.interval = interval;
+      scope.minLength = minLength;
+      scope.annotations = annotations;
+      scope.sequence = sequence;
+    });
+    scope.orfsFunc();
+
+    // remake the editor
+    // TODO: clear all the blast?
+    scope.changeEditor(0, sequence.length);
+  }
+  else{
+    // TODO: error response?
+  }
+}
+
+async function loadInPlasmid(plasmidID){
+  let plasmid = await loadCurrentPlasmid();
+  console.log("loading in plasmid this plasmid is ", plasmid);
+  if(plasmid.response){
+    let uuid = plasmid.response[0].uuid;
+    let plasmidName = plasmid.response[0].plasmidName;
+    let interval = plasmid.response[0].interval;
+    let minLength = plasmid.response[0].minLength;
+    let annotations = JSON.parse(plasmid.response[0].annotations);
+    let sequence = plasmid.response[0].sequence;
+    var scope = angular.element($("#divider")).scope();
+    scope.$apply(function(){
+      scope.plasmidID = uuid;
+      scope.plasmidName = plasmidName;
+      scope.interval = interval;
+      scope.minLength = minLength;
+      scope.annotations = annotations;
+      scope.seq = sequence;
+      scope.orfsdata=findAllORF(sequence, minLength);
+    });
+    // remake the editor
+    // TODO: clear all the blast?
+    scope.changeEditor(0, sequence.length);
+  }
+  else{
+    // TODO: error response?
+  }
+}
+
+
 // for testing
 async function startUp(){
   console.log("calling StartUP")
   // await createUser({username:"lisa", password:"deng"});
   await signInUser({username:"lisa", password:"deng"});
-  let response = await createPlasmid({sequence:testStr, plasmidName:"david3", interval:30, minLength:0, annotations:"[]"}); 
-  console.log("this is the response ", response);
-  let allPlasmids = await getPlasmidsForUser();
-  console.log("all plasmids? ", allPlasmids);
+  // let response = await createPlasmid({sequence:testStr, plasmidName:null, interval:30, minLength:0, annotations:"[]"}); 
+  // console.log("this is the response ", response);
+  // let allPlasmids = await getPlasmidsForUser();
+  // getSpecificPlasmid("9f48a0b6-8866-43c2-a815-5054c8b7200c");
+  await loadInPlasmid();
 }
 startUp();
 
@@ -293,16 +362,16 @@ function deactivateTitle(){
 * @param{string} newSelected - string representation of which tab to focus on
 */
 function toggle(newSelected){
-  var ann = angular.element($("#divider")).scope();
-  ann.selected = newSelected;
+  let scope = angular.element($("#divider")).scope();
+  scope.selected = newSelected;
   deactivateTitle();
   if(newSelected=="dna"){
     document.getElementById("dna").classList.add("active");
-    ann.changeEditor(0,ann.seq.length);
+    scope.changeEditor(0,scope.seq.length);
   }
   if(newSelected=="viewer"||newSelected=="annotate"){
     document.getElementById("viewer").classList.add("active");
-    ann.changeEditor(ann.start,ann.end);
+    scope.changeEditor(scope.start,scope.end);
   }
   if(newSelected=="orf"){
     document.getElementById("viewer").classList.add("active");
@@ -369,14 +438,16 @@ function annotate(start, end){
   let oldEnd = end;
   start = Math.min(oldStart, oldEnd);
   end = Math.max(oldStart, oldEnd);
-
-  var ann = angular.element($("#divider")).scope().annotations;
+  let scope =  angular.element($("#divider")).scope();
+  var ann = scope.annotations;
   for(x=0;x<ann.length;x++){
     if(start<ann[x].end && start>=ann[x].start||end<=ann[x].end&&end>ann[x].start||start<=ann[x].start&&end>=ann[x].end){
       return false;
     }
   }
-  ann.push({start:Math.min(start,end), end:Math.max(start,end), name:"Annotated Frame", set:false});
+
+  let snippet = scope.seq.substring(Math.min(start,end), Math.max(start,end));
+  ann.push({start:Math.min(start,end), end:Math.max(start,end), name:"Annotated Frame", annotationSeq:snippet});
   return true;
 }
 

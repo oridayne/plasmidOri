@@ -56,6 +56,21 @@ class Plasmids{
   }
 
   /**
+   * Find a plasmid given plasmidID
+   * @param {string} plasmidID 
+   * @param {string} username
+   */
+  static async findOnePlasmidByID(plasmidID, username) {
+    try {
+      const sql = `SELECT * FROM plasmids WHERE uuid=(?) AND username=(?);`;
+      const response = await database.query(sql, [plasmidID, username]);
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
    * Update plasmid name
    * @param {string} username - username of user
    * @param {string} plasmidName - current name of the plasmid
@@ -76,7 +91,8 @@ class Plasmids{
   }
 
   /**
-   * Updates the data held in a plasmid, everything but the name
+   * Updates the data held in a plasmid
+   * @param {string} plasmidID - id of plasmid to change
    * @param {string} username - username of user
    * @param {string} sequence - new DNA sequence
    * @param {string} plasmidName - current name of the plasmid
@@ -84,16 +100,28 @@ class Plasmids{
    * @param {int} minLength - new minimum length of orfs accepted
    * @param {string} annotations - new JSON string of object containing annotations information
    */
-  static async updatePlasmidData(username, sequence, plasmidName, interval, minLength, annotations) {
+  static async updatePlasmidData(plasmidID, username, sequence, plasmidName, interval, minLength, annotations) {
     try {
-      const safeUser = sqlite.escape(username);
-      const safeSeq = sqlite.escape(sequence);
-      const safePlasmidName = sqlite.escape(plasmidName);
-      const safeInterval = sqlite.escape(interval);
-      const safeMinLength = sqlite.escape(minLength);
-      const safeAnnotations = sqlite.escape(annotations);
-      const sql = `UPDATE plasmids SET sequence=${safeSeq}, interval=${safeInterval}, minLength=${safeMinLength}, annotations=${safeAnnotations} WHERE username=${safeUser} AND plasmidName=${safePlasmidName};`;
-      const response = await database.query(sql);
+      console.log("new plasmid name", plasmidName);
+      const sql = `UPDATE plasmids SET sequence=(?), interval=(?), minLength=(?), annotations=(?), plasmidName=(?) WHERE username=(?) AND uuid=(?);`;
+      const response = await database.query(sql, [sequence, interval, minLength, annotations, plasmidName, username, plasmidID]);
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+
+  /**
+   * Updates the annotation field in a plasmid
+   * @param {string} plasmidID - id of plasmid to change
+   * @param {string} username - username of user
+   * @param {string} annotations - new JSON string of object containing annotations information
+   */
+  static async updatePlasmidAnnotations(plasmidID, username, annotations) {
+    try {
+      const sql = `UPDATE plasmids SET annotations=(?) WHERE username=(?) AND uuid=(?);`;
+      const response = await database.query(sql, [annotations, plasmidName, username, plasmidID]);
       return response;
     } catch (error) {
       throw error;
@@ -108,7 +136,6 @@ class Plasmids{
     try {
       const sql = `SELECT * FROM plasmids WHERE username=(?);`;
       const response = await database.query(sql, [username]);
-      console.log("user: ", username, response, ", response");
       return response;
     } catch (error) {
       throw error;
@@ -118,12 +145,12 @@ class Plasmids{
   /**
    * delete a plasmid
    * @param {string} username - username of user
-   * @param {string} plasmidName - name of the plasmid
+   * @param {string} plasmidID - ID  of the plasmid
    */
-  static async deletePlasmid(username, plasmidName) {
+  static async deletePlasmid(username, plasmidID) {
     try {
-      const sql = `DELETE FROM plasmids WHERE username=(?) AND plasmidName=(?);`;
-      const response = await database.query(sql, [username, plasmidName]);
+      const sql = `DELETE FROM plasmids WHERE username=(?) AND uuid=(?);`;
+      const response = await database.query(sql, [username, plasmidID]);
       return response;
     } catch (error) {
       throw error;

@@ -9,7 +9,7 @@ const router = express.Router();
 
 
 /**
- * Create a Plasmid
+ * Create a Plasmid, set plasmidID to current session plasmidID
  * @name POST /api/plasmids
  * @param {string} sequence - DNA sequence
  * @param {string} plasmidName - name of the plasmid
@@ -24,17 +24,20 @@ router.post('/', (req, res) => {
   const sanitizedPlasmidName = sanitizer.sanitize(req.body.plasmidName);
   const sanitizedUser = sanitizer.sanitize(req.session.name);
   console.log("current session name is", req.session);
+  console.log(sanitizedPlasmidName, req.body.plasmidName, sanitizedUser);
   Plasmids.findOnePlasmid(sanitizedUser, sanitizedPlasmidName).then((response) => {
+    console.log("in find one plasmid", response);
     if (response.length != 0) {
       res.status(409).json({
         error: 'A plasmid with that name already exists. Please enter a different one to create a plasmid.',
       }).end();
-    } else if (sanitizedPlasmidName.length < 1||sanitizedPlasmidName.indexOf(' ') >= 0) {
-      res.status(400).json({
-        error: 'Plasmid must be at least 1 characters long each and not have any white space.',
-      }).end();
+    } else if ((req.body.plasmidName!=null&&sanitizedPlasmidName.length < 1||req.body.plasmidName!=null&&sanitizedPlasmidName.indexOf(' ') >= 0)) {
+        res.status(400).json({
+          error: 'Plasmid must be at least 1 characters long each and not have any white space.',
+        }).end();
     } 
       else {
+        console.log("i am here in the last cond");
         const sanitizedSeq =  sanitizer.sanitize(req.body.sequence);
         const randomID = uuidv4(); 
         const sanitizedInterval = sanitizer.sanitize(req.body.interval);
@@ -47,35 +50,13 @@ router.post('/', (req, res) => {
                               sanitizedInterval, 
                               sanitizedMinLength, 
                               sanitizedAnnotations).then((response)=>{
-          res.status(200).json({message:"Plasmid sucessfully created", plasmidID:randomID}).end();
+          req.session.plasmidID = randomID;
+          res.status(200).json({message:"Plasmid sucessfully created", plasmidID:randomID, plasmidName:sanitizedPlasmidName}).end();
         })
     }
   });
 });
 
-/**
- * Find a plasmid based on name by user
- * @name GET /api/plasmids/:plasmidName
- * @param{string} plasmiName
- * @return {Plasmid} - the plasmid with that name
- * @throws {404} - if plasmid is not found
- */
-router.get('/plasmid/:plasmidName', (req, res)=>{
-  const sanitizedPlasmidName = sanitizer.sanitize(req.params.plasmidName);
-  const sanitizedUser = sanitizer.sanitize(req.session.name);
-
-  Plasmids.findOnePlasmid(sanitizedUser, sanitizedPlasmidName).then((response)=>{
-    if(response.length==0){
-      res.status(404).json({
-        error: 'A plasmid with that name was not found!',
-      }).end();
-    }
-    else{
-      console.log("here is the plasmid!: ", response);
-      res.status(200).json({message:"Plasmid found", response: response}).end();
-    }
-  });
-});
 
 /**
  * Find all plasmids under a user
@@ -83,11 +64,8 @@ router.get('/plasmid/:plasmidName', (req, res)=>{
  * @return {[Plasmid]} - all plasmids
  */
 router.get('/all', (req, res)=>{
-  console.log("blah! blah blah");
   const sanitizedUser = sanitizer.sanitize(req.session.name);
-  console.log("i am here? getting all?", req.session.name);
   Plasmids.findAllPlasmidsFromUser(sanitizedUser).then((response)=>{
-    console.log("here are all the plasmids: ", response);
     res.status(200).json({message:"Plasmid found", response: response}).end();
   });
 });
@@ -95,16 +73,88 @@ router.get('/all', (req, res)=>{
 
 /**
  * Delete a plasmid
- * @name DELETE /api/plasmids/delete/:plasmidName
- * @param {string} plasmidName 
+ * @name DELETE /api/plasmids/:plasmidName
+ * @param {string} plasmidID
  * @return {200} - success message
  */
-router.delete('/delete/:plasmidName', (req, res) => {
+router.delete('/:plasmidID', (req, res) => {
+  console.log("in delete plasmid");
   const sanitizedUser = sanitizer.sanitize(req.session.name);
-  const sanitizedPlasmidName = sanitizer.sanitize(req.params.plasmidName);
-  Plasmids.deletePlasmid(sanitizedUser, sanitizedPlasmidName).then((response)=>{
+  const sanitizedID = sanitizer.sanitize(req.params.plasmidID);
+  Plasmids.deletePlasmid(sanitizedUser, sanitizedID).then((response)=>{
     res.status(200).json({message:"Plasmid deleted"}).end();
   })
+});
+
+
+/**
+ * Get current plasmid in the session
+ * @name GET /api/plasmids/current
+ * @throw {404} - no current plasmid or plasmid not found
+ * @return {200} - current plasmid object, derived from req.session.plasmidID
+ */
+router.get('/current', (req, res) => {
+  const sanitizedID = sanitizer.sanitize(req.session.plasmidID);
+  const sanitizedUser = sanitizer.sanitize(req.session.name);
+
+  if(req.session.plasmidID==null){
+    res.status(404).json({error:"There is no current plasmid selected"});
+  }
+  else{
+    Plasmids.findOnePlasmidByID(sanitizedID, sanitizedUser).then((response)=>{
+      if(response.length==0){
+        res.status(404).json({error:"no plasmid with ID" + sanitizedID+" was found"}).end();
+      }
+      else{
+        res.status(200).json({message:"plasmid found!", response:response});
+      }
+    });
+  }
+
+});
+
+/**
+ * Get plasmid based on plasmid ID
+ * @name GET /api/plasmids/plasmid/:plasmidID
+ * @throw {404} - no current plasmid or plasmid not found
+ * @return {200} - current plasmid object, derived from req.session.plasmidID
+ */
+router.get('/plasmid/:plasmidID', (req, res) => {
+  const sanitizedID = sanitizer.sanitize(req.params.plasmidID);
+  const sanitizedUser = sanitizer.sanitize(req.session.name);
+
+  Plasmids.findOnePlasmidByID(sanitizedID, sanitizedUser).then((response)=>{
+    if(response.length==0){
+      res.status(404).json({error:"no plasmid with ID" + sanitizedID+" was found"}).end();
+    }
+    else{
+      res.status(200).json({message:"plasmid found!", response:response});
+    }
+  });
+  
+
+});
+
+/**
+ * Set session variable for current plasmid
+ * @name PUT /api/plasmids/plasmid/plasmidID/:plasmidID
+ * @param{string} plasmidID - plasmidID to set in session variable
+ * @throw{404} if plasmidID for that user is not found
+ * @return {200} - success message
+ */
+router.put('/plasmid/plasmidID/:plasmidID', (req, res) => {
+  console.log('setting plasmid ID session', req.params.plasmidID)
+  const sanitizedPlasmidID = sanitizer.sanitize(req.params.plasmidID);
+  const sanitizedUser = sanitizer.sanitize(req.session.name);
+  Plasmids.findOnePlasmidByID(sanitizedPlasmidID, sanitizedUser).then((response)=>{
+    if(response.length==0){
+      res.status(404).json({error:"plasmidID "+sanitizedPlasmidID+" does not exist"});
+    }
+    else{
+      req.session.plasmidID = sanitizedPlasmidID;
+      res.status(200).json({message:"session variable for plasmidID set!", plasmidID: sanitizedPlasmidID});
+    }
+  });
 });
 
 
@@ -135,11 +185,12 @@ router.put('/plasmidName', (req, res) => {
 });
 
 
+
 /**
- * Change an existing plasmid's data
- * @name PUT /api/plasmids/plasmidName
+ * Change an the current plasmid's data
+ * @name PUT /api/plasmids/plasmid
  * @param {string} sequence - new DNA sequence
- * @param {string} plasmidName - name of the plasmid
+ * @param {string} newPlasmidName - name of the plasmid
  * @param {int} interval - new interval of ticks on display
  * @param {int} minLength - new minimum length of orfs accepted
  * @param {string} annotations - new JSON string of object containing annotations information
@@ -147,22 +198,49 @@ router.put('/plasmidName', (req, res) => {
  * @return {new plasmid} - success message
  */
 router.put('/plasmid', (req, res) => {
+  console.log("made it in the put!!!");
   const sanitizedUser = sanitizer.sanitize(req.session.name);
-  const sanitizedPlasmidName = sanitizer.sanitize(req.body.plasmidName);
   const sanitizedNewPlasmidName = sanitizer.sanitize(req.body.newPlasmidName);
   const sanitizedSeq =  sanitizer.sanitize(req.body.sequence);
   const sanitizedInterval = sanitizer.sanitize(req.body.interval);
   const sanitizedMinLength = sanitizer.sanitize(req.body.minLength);
   const sanitizedAnnotations = sanitizer.sanitize(req.body.annotations);
-  Plasmids.findOnePlasmid(sanitizedUser, sanitizedPlasmidName).then((response)=>{
+  Plasmids.findOnePlasmidByID(req.session.plasmidID, sanitizedUser).then((response)=>{
     if(response.length==0){
       res.status(404).json({
-        error: 'A plasmid with that name was not found!',
+        error: 'A plasmid with that ID:'+ req.session.plasmidID+ ' was not found!',
       }).end();
     }
     else{
-      Plasmids.updatePlasmidData(sanitizedUser, sanitizedSeq, sanitizedPlasmidName, sanitizedInterval, sanitizedMinLength, sanitizedAnnotations).then((response)=>{
+      console.log("new name", sanitizedNewPlasmidName)
+      Plasmids.updatePlasmidData(req.session.plasmidID, sanitizedUser, sanitizedSeq, sanitizedNewPlasmidName, sanitizedInterval, sanitizedMinLength, sanitizedAnnotations).then((response)=>{
+        
         res.status(200).json({message:"Plasmid changed", response: response}).end();
+      })
+    }
+  });
+});
+
+/**
+ * Change an the current plasmid's annotation field
+ * @name PUT /api/plasmids/plasmid/annotations
+ * @param {string} annotations - new JSON string of object containing annotations information
+ * @throws {404} plasmid not found
+ * @return {new plasmid} - success message
+ */
+router.put('/plasmid/annotations', (req, res) => {
+  console.log("made it in the put!!!");
+  const sanitizedUser = sanitizer.sanitize(req.session.name);
+  const sanitizedAnnotations = sanitizer.sanitize(req.body.annotations);
+  Plasmids.findOnePlasmidByID(req.session.plasmidID, sanitizedUser).then((response)=>{
+    if(response.length==0){
+      res.status(404).json({
+        error: 'A plasmid with that ID:'+ req.session.plasmidID+ ' was not found!',
+      }).end();
+    }
+    else{
+      Plasmids.updatePlasmidAnnotations(req.session.plasmidID, sanitizedUser, sanitizedAnnotations).then((response)=>{
+        res.status(200).json({message:"Plasmid Annotation changed", response: response}).end();
       })
     }
   });

@@ -9,3 +9,32 @@
  	fill:#f0f0f0;
  	stroke:#ccc;
  }
+
+ #plasmidWrapper{
+ 	display:flex;
+ 	flex-wrap: wrap;
+ }
+
+ .plasmidItem{
+ 	margin-left:5px;
+ 	margin-right: 5px;
+ 	text-align: center;
+
+ }
+ .boros:hover {
+ 	outline: 1px solid steelblue;
+
+ }
+
+.activePlasmidItem{
+	outline: 1px solid steelblue;
+}
+
+ .plasmidName{
+ 	margin:auto;
+ 	text-align: center;
+ }
+
+ .delete:hover{
+ 	color:darkred;
+ }

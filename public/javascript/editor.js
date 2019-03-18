@@ -184,9 +184,34 @@ app.controller('myEditor',function($scope){
 	    }
 	};
 
+	$scope.savePlasmidToDB = async function(){
+		let scope = angular.element($("#divider")).scope();
+		console.log('saving plasmid!', scope.plasmidName, " - plasmid name");
+
+		let annotations = JSON.stringify(scope.annotations); // list 
+		let interval = scope.interval;
+		let minLength = scope.minLength;
+		let plasmidName = scope.plasmidName;
+		let DNA = scope.seq;
+		let obj = {"sequence":DNA, "newPlasmidName":plasmidName, "interval":interval, "minLength":minLength, "annotations":annotations};
+		if(scope.plasmidID){
+			
+			let savedPlasmid = await updatePlasmid(obj);
+			//TODO: error message if it cannot be saved!
+			console.log("saved plasmid results: ", savedPlasmid);
+		}
+		// uploaded plasmid - we need to reate a new one
+		else{
+			console.log("in plasmid creationg?");
+			let createdPlasmid = await createPlasmid(obj); 
+			console.log("created plasmid results", createdPlasmid);
+			scope.plasmidID = createdPlasmid.plasmidID;
+			// TODO: error message on plasmid creation failing
+		}
+	}
+
 	// save all current progress permanently
-	$scope.saveProgress = function(){
-		console.log("saving progress??");
+	$scope.saveProgress = async function(){
 		document.getElementById("dnaWrapper").className = "saved";
 		document.getElementById("saveButton").className = "savedButton";
 		let scope = angular.element($("#divider")).scope();
@@ -201,13 +226,16 @@ app.controller('myEditor',function($scope){
 			newStr = start+mid+end;
 		}
 		else{
-			console.log("now am here???");
 			newStr = editorScope.seq.substring(0,$scope.offsetStart)+$scope.textbuffer+editorScope.seq.substring($scope.offsetEnd);
 		}
 		// newStr = newStr.toUpperCase().replace(/-/g, '');
 		scope.seq = newStr;
 		$scope.offsetEnd = $scope.offsetStart+$scope.textbuffer.length;
 		scope.orfsFunc();
+		$scope.savePlasmidToDB();
+		//TODO: figure out how to not link this by index....
+		await updateAnnotations();
+
 	}
 
 	// save a row to the temporary buffer
@@ -239,6 +267,7 @@ app.controller('myEditor',function($scope){
 		}
 	},
 	$scope.editRow=function(index, event){
+		console.log("cursor? ", event.target.selectionStart)
 		$scope.editing = 0;
 		let elt = document.getElementById(index);
 		let newVal = elt.value.toUpperCase();
@@ -356,4 +385,31 @@ function returnList(text, buffer, bucket){
 		result.push([threeFive,  fiveThree]);
 	}
 	return result;
+}
+
+// checks if the annotations remain what they once were
+// TODO: only checks if the annotation index numbers are reasonable within the index
+// future: figure out how to free it from th e index...
+async function updateAnnotations(){
+	let scope = angular.element($("#divider")).scope();
+	let ann = scope.annotations;
+	let seq = scope.seq;
+	console.log("annotations", ann);
+	let newAnnotations = [];
+	for(var index in ann){
+		let elt = ann[index];
+		console.log("this is elt", elt);
+		if(elt.start<seq.length&&elt.end<seq.length){
+			newAnnotations.push(elt);
+		}
+		// let originalSeq = elt.annotationSeq;
+		// let newSeq = seq.substring(elt.start, elt.end);
+		// console.log("originalSeq", originalSeq, " newSeq ", newSeq);
+		// if(originalSeq==newSeq){
+		// 	newAnnotations.push(elt);
+		// }
+	}
+	scope.annotations = newAnnotations;
+	// let response = await updatePlasmidAnnotations({"annotations":JSON.stringify(newAnnotations)});
+	// console.log("response is", response);
 }
