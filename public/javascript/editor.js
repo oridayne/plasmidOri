@@ -2,7 +2,7 @@
 
 var acceptedLetters = {"a":true, "g":true, "c":true, "t":true, "A":true, "G":true, "C":true, "T":true, " ":true};
 var acceptedKeys = {"Shift":true, "Backspace":true, "ArrowLeft":true, "ArrowRight":true, "Enter": true};
-var converter = {"A":"T", "T":"A", "G":"C", "C":"G", " ":" "};
+var nucConverter = {"A":"T", "T":"A", "G":"C", "C":"G", " ":" ", "a":"T", "t":"A", "g":"C", "c":"G"};
 
 
 // TODO:
@@ -35,7 +35,7 @@ app.controller('myEditor',function($scope){
 
 	$scope.rowIndices = generateIndices(50, 10);
 	// allowance for spacing
-	$scope.sections =returnList($scope.DNA, $scope.buffer, $scope.bucket);
+	$scope.sections =returnSections($scope.DNA, $scope.buffer, $scope.bucket);
 	$scope.display = "default";
 	$scope.newRow = true;
 
@@ -59,10 +59,13 @@ app.controller('myEditor',function($scope){
 	}
 
 	$scope.setEditor = function(start, end, text){
+		console.log("set editor called!");
 		$scope.offsetStart = Math.min(start,end);
 		$scope.offsetEnd = Math.max(start,end);
 		$scope.textbuffer = text;
-		$scope.sections = returnList(text, $scope.buffer, $scope.bucket);
+		console.log("return list called");
+		$scope.sections = returnSections(text, $scope.buffer, $scope.bucket);
+		console.log("after return list??")
 	}
 
 	$scope.toggleIndice = function(toggle){
@@ -155,9 +158,11 @@ app.controller('myEditor',function($scope){
 			event.preventDefault();
 			return;
 		}
+
+		//TODO: fix bug where this is called on the single editor???
 		if((event.ctrlKey==true||event.metaKey==true)&&event.key=="s"){
-			$scope.saveToBuffer(document.activeElement.id, $scope.editing);
-			$scope.saveProgress();
+			// $scope.saveToBuffer(document.activeElement.id, $scope.editing);
+			// $scope.saveProgress();
 			return;
 		}
 		if((event.ctrlKey==true||event.metaKey==true)){
@@ -192,8 +197,14 @@ app.controller('myEditor',function($scope){
 		let interval = scope.interval;
 		let minLength = scope.minLength;
 		let plasmidName = scope.plasmidName;
-		let DNA = scope.seq;
-		let obj = {"sequence":DNA, "newPlasmidName":plasmidName, "interval":interval, "minLength":minLength, "annotations":annotations};
+		let DNA = scope.seq.toUpperCase();
+		let data = JSON.stringify(scope.annotationData);
+		let obj = {"sequence":DNA, 
+		           "newPlasmidName":plasmidName, 
+		           "interval":interval, 
+		           "minLength":minLength, 
+		           "annotations":annotations,
+		       		"annotationData": data};
 		if(scope.plasmidID){
 			
 			let savedPlasmid = await updatePlasmid(obj);
@@ -232,10 +243,9 @@ app.controller('myEditor',function($scope){
 		scope.seq = newStr;
 		$scope.offsetEnd = $scope.offsetStart+$scope.textbuffer.length;
 		scope.orfsFunc();
+		scope.updateAnnotations();
 		$scope.savePlasmidToDB();
 		//TODO: figure out how to not link this by index....
-		await updateAnnotations();
-
 	}
 
 	// save a row to the temporary buffer
@@ -251,12 +261,12 @@ app.controller('myEditor',function($scope){
 		else{
 			elt = document.getElementById(index+"row2");
 			newVal = elt.value.toUpperCase().replace(/\s/g, '');
-			newVal = getCompStrand(newVal);
+			newVal = getComplementaryStrand(newVal);
 
 		}
 		let newText = $scope.textbuffer.substring(0,index*rowSize)+newVal+$scope.textbuffer.substring((index*rowSize)+rowSize);
 		$scope.textbuffer = newText;
-		// $scope.sections = returnList($scope.textbuffer, $scope.buffer, $scope.bucket);
+		// $scope.sections = returnSections($scope.textbuffer, $scope.buffer, $scope.bucket);
 
 	},
 	$scope.editSingleRow = function(event){
@@ -272,12 +282,12 @@ app.controller('myEditor',function($scope){
 		let elt = document.getElementById(index);
 		let newVal = elt.value.toUpperCase();
 		if(event.keyCode!=13){
-			$scope.sections[index][1] = getCompStrand(newVal);
+			$scope.sections[index][1] = getComplementaryStrand(newVal);
 		}
 		// save it
 		else{
 			$scope.saveToBuffer(index, $scope.row1);
-			$scope.sections = returnList($scope.textbuffer, $scope.buffer, $scope.bucket);
+			$scope.sections = returnSections($scope.textbuffer, $scope.buffer, $scope.bucket);
 		}
 	},
 	// edits second strand and update complementary
@@ -286,12 +296,12 @@ app.controller('myEditor',function($scope){
 		let elt = document.getElementById(index+"row2");
 		let newVal = elt.value.toUpperCase();
 		if(event.keyCode!=13){
-			$scope.sections[index][0] = getCompStrand(newVal);
+			$scope.sections[index][0] = getComplementaryStrand(newVal);
 		}
 		// save it
 		else{
 			$scope.saveToBuffer(index, $scope.row2);
-			$scope.sections = returnList($scope.textbuffer, $scope.buffer, $scope.bucket);
+			$scope.sections = returnSections($scope.textbuffer, $scope.buffer, $scope.bucket);
 
 		}
 	}
@@ -300,7 +310,7 @@ app.controller('myEditor',function($scope){
 		// back to double strand
 		if(style=="default"){
 			$scope.textbuffer = $scope.textbuffer.toUpperCase();
-			$scope.sections =returnList($scope.textbuffer, $scope.buffer, $scope.bucket);
+			$scope.sections =returnSections($scope.textbuffer, $scope.buffer, $scope.bucket);
 		}
 
 	}
@@ -346,12 +356,12 @@ function generateIndices(buffer, bucket){
 * @param{string} DNA strand
 * @return complementary strand
 */
-function getCompStrand(strand){
+function getComplementaryStrand(strand){
 	let comp = "";
 	for(i=0;i<strand.length;i++){
 		// anything not valid in a DNA strand is not added
-		if(converter[strand[i]]){
-			comp+=converter[strand[i]];
+		if(nucConverter[strand[i]]){
+			comp+=nucConverter[strand[i]];
 		}
 	}
 	return comp;
@@ -365,8 +375,9 @@ function getCompStrand(strand){
 * @param{int} bucket - a row is split into buckets. There is one space after {bucket}dna base pairs
 * @return [[strand, comp strand],..... ]
 */
-function returnList(text, buffer, bucket){
+function returnSections(text, buffer, bucket){
 	let result = [];
+
 	for(x=0;x<text.length;x+=buffer){
 		let strand = "";
 		for(y=x;y<x+buffer;y+=bucket){
@@ -381,35 +392,11 @@ function returnList(text, buffer, bucket){
 		}
 		threeFive = strand;
 		// add complementary stand
-		let fiveThree=getCompStrand(threeFive);		
+		let fiveThree=getComplementaryStrand(threeFive);	
 		result.push([threeFive,  fiveThree]);
 	}
-	return result;
-}
-
-// checks if the annotations remain what they once were
-// TODO: only checks if the annotation index numbers are reasonable within the index
-// future: figure out how to free it from th e index...
-async function updateAnnotations(){
-	let scope = angular.element($("#divider")).scope();
-	let ann = scope.annotations;
-	let seq = scope.seq;
-	console.log("annotations", ann);
-	let newAnnotations = [];
-	for(var index in ann){
-		let elt = ann[index];
-		console.log("this is elt", elt);
-		if(elt.start<seq.length&&elt.end<seq.length){
-			newAnnotations.push(elt);
-		}
-		// let originalSeq = elt.annotationSeq;
-		// let newSeq = seq.substring(elt.start, elt.end);
-		// console.log("originalSeq", originalSeq, " newSeq ", newSeq);
-		// if(originalSeq==newSeq){
-		// 	newAnnotations.push(elt);
-		// }
+	if(result.length==0){
+		return [[""]];
 	}
-	scope.annotations = newAnnotations;
-	// let response = await updatePlasmidAnnotations({"annotations":JSON.stringify(newAnnotations)});
-	// console.log("response is", response);
+	return result;
 }

@@ -1,3 +1,8 @@
+
+NEW TODOS:
+add new table element - annotationData
+make clear what kinds of genes are annotated- new display for annotated genes?
+
 TODOS:
 - better UI for search list 
 - test cases

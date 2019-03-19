@@ -1,7 +1,7 @@
 <div id="editorModule" ng-controller="myEditor">
     <div>   
             <label class="container">Double
-              <input type="radio" checked="checked" name="editor" ng-click="switchDisplay('default')">
+              <input type="radio" checked="checked"  name="editor" ng-click="switchDisplay('default')">
             </label>
             <label class="container">Single
               <input type="radio" name="editor" ng-click="switchDisplay('single')">
@@ -49,10 +49,10 @@
                                 </div>
                                 <!-- <div id="{{$index}}blast" class="blastMatch"></div> -->
                                 <!-- positive strand -->
-                                <input id="{{$index}}" spellcheck="false" ng-click="startEditing($event)" ng-blur="saveToBuffer($index, row1)" ng-keydown="disable($event)" class="input" ng-model="row[0]" contenteditable ng-keyup="editRow($index, $event)">
+                                <input id="{{$index}}" placeholder="GATTACA..." spellcheck="false" ng-click="startEditing($event)" ng-blur="saveToBuffer($index, row1)" ng-keydown="disable($event)" class="input" ng-model="row[0]" contenteditable ng-keyup="editRow($index, $event)">
 
                                 <!-- negative strand -->
-                                <input id="{{$index}}row2" spellcheck="false" ng-click="startEditing($event)" ng-blur="saveToBuffer($index, row2)" ng-model="row[1]" ng-keydown="disable($event)" class="input" contenteditable ng-keyup="editSecondRow($index, $event)">
+                                <input id="{{$index}}row2" placeholder="CTAATGT..." spellcheck="false" ng-click="startEditing($event)" ng-blur="saveToBuffer($index, row2)" ng-model="row[1]" ng-keydown="disable($event)" class="input" contenteditable ng-keyup="editSecondRow($index, $event)">
                                 
                                 <!-- negative strand blast match -->
                                 <div class="blastCompare" ng-show="blastSections.length!=0&& blastSections[$index].length!=0&&editorBlastMatch.minus==true&&blastOn">
@@ -66,7 +66,7 @@
                 </div>
             </div>
             <div ng-show="display=='single'">
-                <textarea id="singleEditor" ng-model="textbuffer" ng-click="startEditingSingle($event)"   spellcheck="false" ng-keydown="disable($event)" ng-keyup="editSingleRow($event)" ng-blur="stopEditingSingle($event)" class="single saved">
+                <textarea id="singleEditor" placeholder="GATTACA..." ng-model="textbuffer" ng-click="startEditingSingle($event)"   spellcheck="false" ng-keydown="disable($event)" ng-keyup="editSingleRow($event)" ng-blur="stopEditingSingle($event)" class="single saved">
 
                 </textarea>
             </div>

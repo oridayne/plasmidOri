@@ -25,6 +25,7 @@ function returnPlasmidData(axiosResponse){
 *   {int} interval: number of ticks 
 *   {int} minLength: min length of orfs shown
 *   {string} annotations: json string of object of annotations
+*   {string} annotationData: json sting of object containing gene names
 * }
 */
 function createPlasmid(fields){
@@ -63,6 +64,7 @@ function getPlasmidsForUser(){
 * @param {int} interval - new interval of ticks on display
 * @param {int} minLength - new minimum length of orfs accepted
 * @param {string} annotations - new JSON string of object containing annotations information
+* @param {string} annotationData 
 * }
 */
 function updatePlasmid(fields){
@@ -77,24 +79,7 @@ function updatePlasmid(fields){
     }); // on failure (Other Status Code) 
 }
 
-/*
-* updates an existing plasmid's annotation field
-* @param{object} field
-* {
-* @param {string} annotations - new JSON string of object containing annotations information
-* }
-*/
-function updatePlasmidAnnotations(fields){
-  console.log(" in update plasmid");
-  return axios.put('/api/plasmids/plasmid/annotations', fields)
-    .then(returnPlasmidData) // on success (Status Code 200)
-    .catch(function(axiosResponse){
-      // TODO: error output here
-      let data = returnPlasmidData(axiosResponse);
-      console.log("plasmid update failed: ", data);
-      return data;
-    }); // on failure (Other Status Code) 
-}
+
 
 /*
 * loads in current plasmid 

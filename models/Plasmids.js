@@ -30,10 +30,10 @@ class Plasmids{
    * @param {int} minLength - minimum length of orfs accepted
    * @param {string} annotations - JSON string of object containing annotations information
    */
-  static async createPlasmid(uuid, username, sequence, plasmidName, interval, minLength, annotations) {
+  static async createPlasmid(uuid, username, sequence, plasmidName, interval, minLength, annotations, annotationData) {
     try {
-      const sql = `INSERT INTO plasmids (uuid, username, sequence, plasmidName, interval, minLength, annotations) VALUES (?, ?, ?, ?, ?, ?, ?);`;
-      const response = await database.query(sql,[uuid, username, sequence, plasmidName, interval, minLength, annotations]);
+      const sql = `INSERT INTO plasmids (uuid, username, sequence, plasmidName, interval, minLength, annotations, annotationData) VALUES (?, ?, ?, ?, ?, ?, ?, ?);`;
+      const response = await database.query(sql,[uuid, username, sequence, plasmidName, interval, minLength, annotations, annotationData]);
       return response;
     } catch (error) {
       throw error;
@@ -100,11 +100,11 @@ class Plasmids{
    * @param {int} minLength - new minimum length of orfs accepted
    * @param {string} annotations - new JSON string of object containing annotations information
    */
-  static async updatePlasmidData(plasmidID, username, sequence, plasmidName, interval, minLength, annotations) {
+  static async updatePlasmidData(plasmidID, username, sequence, plasmidName, interval, minLength, annotations, annotationData) {
     try {
       console.log("new plasmid name", plasmidName);
-      const sql = `UPDATE plasmids SET sequence=(?), interval=(?), minLength=(?), annotations=(?), plasmidName=(?) WHERE username=(?) AND uuid=(?);`;
-      const response = await database.query(sql, [sequence, interval, minLength, annotations, plasmidName, username, plasmidID]);
+      const sql = `UPDATE plasmids SET sequence=(?), interval=(?), minLength=(?), annotations=(?), annotationData=(?), plasmidName=(?) WHERE username=(?) AND uuid=(?);`;
+      const response = await database.query(sql, [sequence, interval, minLength, annotations, annotationData, plasmidName, username, plasmidID]);
       return response;
     } catch (error) {
       throw error;

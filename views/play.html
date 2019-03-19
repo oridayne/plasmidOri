@@ -97,6 +97,7 @@
                     <div id="dna" class="item active" ng-click="toggle('dna')"><p>DNA</p></div>
                     <div id="viewer" class="item" ng-click="toggle('viewer')"><p>Viewer</p></div>
                     <div id="blast" class="item" ng-click="toggle('blast')"><p>Blast Align</p></div>
+                    <div id="option" class="item" ng-click="toggle('option')"><p>Options</p></div>
 
                 <div id="content">
 
@@ -114,6 +115,7 @@
                         <div>
                             <input type="text" placeholder="Search.." id="searchDNA" ng-keydown="disable($event)" ng-keyup="searchDNA();" ng-model="search">
                             <button  id="clearButton" ng-click="clearSearch();">Clear</button>
+                            <button ng-show="searchResults.length>0" id="annotateButton" ng-click="annotateSearchResults()">Annotate</button>
                         </div>
 
                         <!-- BLAST VIEWER -->
@@ -122,7 +124,7 @@
                             <!-- editor template -->
                         <div ng-include="'template/editor.html'"></div>
 
-                        <button ng-show="(start!=end)&&selected=='viewer'" id="annotateButton" ng-click="annotate(start, end);">Annotate</button>
+                   <!--      <button ng-show="(start!=end)&&selected=='viewer'" id="annotateButton" ng-click="annotate(start, end);">Annotate</button> -->
 
                         <button ng-show="selectedStart" ng-click="annotate(selectedStart, selectedEnd);">Annotate</button>
                     </div>

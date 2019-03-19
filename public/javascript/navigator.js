@@ -7,10 +7,7 @@ function toHome(){
 }
 
 async function newBlankPlasmid(){
-
-	let fields = {sequence:"", plasmidName: null, interval:30, minLength:0, annotations:"[]"};
+	let fields = {sequence:"", plasmidName: null, interval:30, minLength:0, annotations:"[]", annotationData:"{}"};
 	let newPlas = await createPlasmid(fields);
-	console.log(newPlas);
 	location.href="/";
-
 }

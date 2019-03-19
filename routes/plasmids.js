@@ -16,6 +16,7 @@ const router = express.Router();
  * @param {int} interval - interval of ticks on display
  * @param {int} minLength - minimum length of orfs accepted
  * @param {string} annotations - JSON string of object containing annotations information
+ * @param {string} annotationData - JSON string of object containing annotation names of genes
  * @return {Plasmid} - the created Plasmid
  * @throws {400} - if plasmid name is not at least 1 character long/has white space
  * @throws {409} - if plasmidName is already taken
@@ -43,13 +44,15 @@ router.post('/', (req, res) => {
         const sanitizedInterval = sanitizer.sanitize(req.body.interval);
         const sanitizedMinLength = sanitizer.sanitize(req.body.minLength);
         const sanitizedAnnotations = sanitizer.sanitize(req.body.annotations);
+        const sanitizedAnnotationData = sanitizer.sanitize(req.body.annotationData);
         Plasmids.createPlasmid(randomID, 
                               sanitizedUser, 
                               sanitizedSeq, 
                               sanitizedPlasmidName, 
                               sanitizedInterval, 
                               sanitizedMinLength, 
-                              sanitizedAnnotations).then((response)=>{
+                              sanitizedAnnotations,
+                              sanitizedAnnotationData).then((response)=>{
           req.session.plasmidID = randomID;
           res.status(200).json({message:"Plasmid sucessfully created", plasmidID:randomID, plasmidName:sanitizedPlasmidName}).end();
         })
@@ -194,6 +197,7 @@ router.put('/plasmidName', (req, res) => {
  * @param {int} interval - new interval of ticks on display
  * @param {int} minLength - new minimum length of orfs accepted
  * @param {string} annotations - new JSON string of object containing annotations information
+ * @param {string} annotationData - new JSON string of object containing gene names
  * @throws {404} plasmid not found
  * @return {new plasmid} - success message
  */
@@ -205,6 +209,7 @@ router.put('/plasmid', (req, res) => {
   const sanitizedInterval = sanitizer.sanitize(req.body.interval);
   const sanitizedMinLength = sanitizer.sanitize(req.body.minLength);
   const sanitizedAnnotations = sanitizer.sanitize(req.body.annotations);
+  const sanitizedAnnotationData = sanitizer.sanitize(req.body.annotationData);
   Plasmids.findOnePlasmidByID(req.session.plasmidID, sanitizedUser).then((response)=>{
     if(response.length==0){
       res.status(404).json({
@@ -213,7 +218,7 @@ router.put('/plasmid', (req, res) => {
     }
     else{
       console.log("new name", sanitizedNewPlasmidName)
-      Plasmids.updatePlasmidData(req.session.plasmidID, sanitizedUser, sanitizedSeq, sanitizedNewPlasmidName, sanitizedInterval, sanitizedMinLength, sanitizedAnnotations).then((response)=>{
+      Plasmids.updatePlasmidData(req.session.plasmidID, sanitizedUser, sanitizedSeq, sanitizedNewPlasmidName, sanitizedInterval, sanitizedMinLength, sanitizedAnnotations, sanitizedAnnotationData).then((response)=>{
         
         res.status(200).json({message:"Plasmid changed", response: response}).end();
       })
