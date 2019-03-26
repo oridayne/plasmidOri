@@ -20,8 +20,6 @@ class Users {
    */
   static async addOneUser(username, password) {
     try {
-      const safeUser = escape(username);
-      const safePassword = escape(password);
       // const sql = `INSERT INTO users (username, password) VALUES (${safeUser}, ${safePassword});`;
       const sql = `INSERT INTO users (username, password) VALUES (?, ?);`;
       const response = await database.query(sql, [username, password]);

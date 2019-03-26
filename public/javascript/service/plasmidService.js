@@ -98,22 +98,6 @@ function loadCurrentPlasmid(){
 
 
 /*
-* loads in a specific plasmid
-* @param {object} field {@param{string} plasmid:""}
-* @return plasmid object, or error message if plasmid ID does not exist for the signed in user
-*/
-function loadSpecificPlasmid(plasmidID){
-  return axios.get('/api/plasmids/plasmid/'+plasmidID)
-    .then(returnPlasmidData) // on success (Status Code 200)
-    .catch(function(axiosResponse){
-      // TODO: error output here
-      let data = returnPlasmidData(axiosResponse);
-      console.log("plasmid load failed: ", data);
-      return data;
-    }); // on failure (Other Status Code) 
-}
-
-/*
 * Sets selected plasmid ID in session variables
 * @param{string} plasmidID
 */
@@ -126,6 +110,22 @@ function setPlasmid(plasmidID){
       return data;
     }); // on failure (Other Status Code) 
 }
+
+
+
+/*
+* Gets all prototypes matched with the current plasmid
+*/
+function getMatchedPrototypes(){
+  return axios.get('/api/plasmids/prototypes')
+    .then(returnPlasmidData) // on success (Status Code 200)
+    .catch(function(axiosResponse){
+      let data = returnPlasmidData(axiosResponse);
+      console.log("getting matched prototypes failed", data);
+      return data;
+    }); // on failure (Other Status Code) 
+}
+
 
 
 

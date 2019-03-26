@@ -12,6 +12,7 @@
 
         <script src="javascript/service/plasmidService.js" type="text/javascript"></script>
         <script src="javascript/service/userService.js" type="text/javascript"></script>
+        <script src="javascript/service/prototypeService.js" type="text/javascript"></script>
 
         <script src="javascript/blastAPI.js" type="text/javascript"></script>
         <script src="javascript/pscript.js" type="text/javascript"></script>
@@ -47,7 +48,7 @@
                         <trackscale  id="innerticks" class='smajor' interval='{{interval}}' showlabels='1' labelclass='sml'></trackscale>
 
                         <!-- user annotations       -->
-                        <trackmarker class="highlight" ng-repeat='n in annotations' start='{{n.start}}' end='{{n.end}}' ng-click="toggle('annotate'); setAnnotatePoints(n.start, n.end, n.name); focusAnnotation(n.start,n.end);"  >
+                        <trackmarker  ng-repeat='n in annotations' class="highlight" ng-class="{'annHighlight': n.annotationSeq==annotationHighlight}"  start='{{n.start}}' end='{{n.end}}' ng-click="toggle('annotate'); setAnnotatePoints(n.start, n.end, n.name); focusAnnotation(n.start,n.end);"  >
                            <!--  <markerlabel ng-click="testing($event)" text="{{n.name}}" vadjust="40" hadjust="0" valign="outer" class="lglabel black labelhover" showline="1" linevadjust="-10" linevadjust="-15" lineclass="labelline"></markerlabel> -->
 
                         </trackmarker>
@@ -111,12 +112,7 @@
                             <button class="btn" ng-click="removeAnnotation(annotateStart, annotateEnd);deleteAnnotation(annotateStart, annotateEnd); orfsFunc();">Delete Sequence</button>
                         </div>
 
-                        <!-- search bar -->
-                        <div>
-                            <input type="text" placeholder="Search.." id="searchDNA" ng-keydown="disable($event)" ng-keyup="searchDNA();" ng-model="search">
-                            <button  id="clearButton" ng-click="clearSearch();">Clear</button>
-                            <button ng-show="searchResults.length>0" id="annotateButton" ng-click="annotateSearchResults()">Annotate</button>
-                        </div>
+
 
                         <!-- BLAST VIEWER -->
                         <div ng-show="selected=='viewer'" ng-include="'template/blastViewer.html'"></div>
@@ -195,6 +191,33 @@
                                 </div>
 
                             </div>
+                        </div>
+
+                        <!-- Options tab -->
+                        <div id="optionWrapper" ng-show="selected=='option'">
+                            <!-- search bar -->
+                            <div>
+                                <input type="text" placeholder="Search.." id="searchDNA" ng-keydown="disable($event)" ng-keyup="searchDNA();" ng-model="search">
+                                <button  id="clearButton" ng-click="clearSearch();">Clear</button>
+                                <button ng-show="searchResults.length>0" id="annotateButton" ng-click="annotateSearchResults()">Annotate</button>
+                            </div>
+
+                            <!-- Annotations List -->
+                        
+                            <div>
+                                <p class="blastStyle">Annotations List</p>
+                                <div class="annotationWrapper silverOutline" ng-repeat="(gene, name) in annotationData" ng-click="highlightAllAnnotations(gene, name)" ng-dblclick="deHighlightAllAnnotations(name)" id="{{name}}">
+                                        <div>{{name}} 
+                                            <i ng-click="removeAllAnnotations(gene)" class="fas fa-times deleteAnn"></i>
+                                            <!-- <i class="fas fa-chevron-down expandAnn"></i> -->
+
+                                        </div>
+                                        <div>{{gene}}</div>
+                                       
+                                </div>
+                            </div>
+                            <!-- <div ng-repeat="x in annotations">{{x}}</div> -->
+
                         </div>
                     </div>
 

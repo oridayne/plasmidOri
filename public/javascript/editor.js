@@ -198,6 +198,7 @@ app.controller('myEditor',function($scope){
 		let minLength = scope.minLength;
 		let plasmidName = scope.plasmidName;
 		let DNA = scope.seq.toUpperCase();
+		console.log("ann is ", annotations);
 		let data = JSON.stringify(scope.annotationData);
 		let obj = {"sequence":DNA, 
 		           "newPlasmidName":plasmidName, 
@@ -245,6 +246,7 @@ app.controller('myEditor',function($scope){
 		scope.orfsFunc();
 		scope.updateAnnotations();
 		$scope.savePlasmidToDB();
+		$scope.sections = returnSections(newStr, $scope.buffer, $scope.bucket);
 		//TODO: figure out how to not link this by index....
 	}
 

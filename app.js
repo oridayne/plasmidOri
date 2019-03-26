@@ -5,7 +5,7 @@ const logger = require('morgan');
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const plasmidsRouter = require('./routes/plasmids');
-
+const protoRouter = require('./routes/prototypes')
 const app = express();
 
 app.engine('html', require('ejs').renderFile);
@@ -19,5 +19,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/plasmids', plasmidsRouter);
+app.use('/api/prototypes', protoRouter);
 
 module.exports = app;

@@ -26,6 +26,7 @@
 	outline: 1px solid silver;
 	height: 100%;
 	min-height: 98vh;
+	max-height: 120vh;
 }
 #searchDNA{
 	width: var(--canvas-modified);
@@ -239,6 +240,9 @@
 	outline: 2px solid green;
 }
 
+#optionWrapper{
+	padding:10px;
+}
 
 .blastIndex{
 	width: auto;
@@ -247,4 +251,44 @@
 	margin-left: 10px;
 	text-align: left;
 	margin-bottom: 0;
+}
+
+
+
+.annotationWrapper{
+	display:flex;
+	flex-direction:column;
+	margin-top:10px;
+	font-size: 14px;
+	font-family: "Courier New", Courier, monospace;
+}
+
+.silverOutline{
+	outline: 1px solid silver;
+}
+
+.silverOutline:hover{
+	outline: 1px solid steelblue;
+}
+
+
+.deleteAnn, .expandAnn{
+	float:right;
+	padding: 3px;
+	color: silver;
+}
+
+.expandAnn:hover{
+	color:black;
+}
+
+.deleteAnn:hover{
+	color:darkred;
+}
+
+
+.annHighlight{
+	fill:rgba(0,0,255,.2);
+	stroke-width:2px;
+	stroke:green;
 }

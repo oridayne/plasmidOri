@@ -2,21 +2,28 @@
 
     <div id="blastWrapper">
         <!-- <div contentEditable=true data-text="Enter query here" id="blastSubmit"></div> -->
-        
         <div class="blastStyle" ng-show="loading">Loading...</div>
-
         <div id="hspList">
 
-            <div ng-show="!rid" contentEditable=true data-text="Enter query here" id="blastSubmit"></div>
+            <div ng-show="!rid" class="blastCenter">
+                
+                <textarea id="blastSubmit" ng-keydown="disable($event)" ng-model="blastQuery" placeholder="Enter nucelotide query here"></textarea>
+                <button ng-click="blastSequence()">Blast</button>
+
+            </div>
 
 
             </div>
-            <div ng-show="rid" class="blastStyle">
-                RID:{{rid}} <br> 
-                Blast Link: https://blast.ncbi.nlm.nih.gov/blast/BlastAlign.cgi?CMD=GET&RID={{rid}}
+            <div ng-show="rid" >
+                <div class="blastStyle">
+                    RID:{{rid}} <br> 
+                    Blast Link: https://blast.ncbi.nlm.nih.gov/blast/BlastAlign.cgi?CMD=GET&RID={{rid}}
+                </div>
+                <button ng-click="clearBlast();">Clear</button>
+                
             </div>
             <!-- wrapper -->
-            <div ng-repeat="x in hspList track by $index" class="blastHSP" ng-click="setBlast(x)">
+            <div ng-repeat="x in hspList track by $index" class="blastHSP" ng-click="setBlast(x); activateHsp($index)" id="hsp{{$index}}">
                 <!-- header -->
                 <div>
                     <strong>Range {{x.num}}: {{x.hfrom}} to {{x.hto}}</strong>
@@ -24,9 +31,10 @@
                     Score = {{x["bitscore"]}} bits ({{x.score}}), Expect={{x.expect}}<br>
                     Identities={{x.identities}}/{{x.align}} ({{((x.identities/x.align)*100).toFixed(0)}}%), Gaps = {{x.gaps}}/{{x.align}} ({{((x.gaps/x.align)*100).toFixed(0)}}%)
                 </div>
-                <!-- left indice -->
-                <div class="blastStyle">
+               
+                <div class="blastStyle" ng-show="testToggle==$index">
                     <div class="blastIndex">
+                         <!-- left indice -->
                         <div ng-repeat="indice in x.leftIndices">
                             Query {{indice[0]}} <br><br>
                             Sbjct {{indice[1]}} <br><br>
@@ -55,4 +63,3 @@
 
         </div>
     </div>
-</div>

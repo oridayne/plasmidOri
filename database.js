@@ -73,6 +73,17 @@ class Database {
       throw error;
     }
   }
+  async dropTable(name){
+    try{
+      const drop = `DROP TABLE IF EXISTS (?)`
+      const response = await database.query(drop, [name]);
+    console.log("Dropped table ", name, " ", response);
+
+    }
+    catch(error){
+      throw error;
+    }
+  }
   async createTables() {
     // create users table
      try{
@@ -80,6 +91,22 @@ class Database {
       username TEXT NOT NULL,
       password TEXT NOT NULL,
       PRIMARY KEY (username))`
+
+      const response = await database.query(sql);
+           console.log("created users table", response);
+
+     }
+     catch(error){
+      throw error;
+     }
+    // create prototypes table
+     try{
+      const sql = `CREATE TABLE IF NOT EXISTS prototypes(
+      name TEXT NOT NULL,
+      sequence TEXT NOT NULL,
+      plainSequence TEXT NOT NULL,
+      type INT NOT NULL,
+      PRIMARY KEY (name))`
 
       const response = await database.query(sql);
            console.log("created users table", response);

@@ -1,4 +1,5 @@
 const Plasmids = require('../models/Plasmids');
+const Prototypes = require('../models/Prototypes');
 const express = require('express');
 const sanitizer = require('sanitizer');
 const bcrypt = require('bcryptjs');
@@ -227,7 +228,7 @@ router.put('/plasmid', (req, res) => {
 });
 
 /**
- * Change an the current plasmid's annotation field
+ * Change  the current plasmid's annotation field
  * @name PUT /api/plasmids/plasmid/annotations
  * @param {string} annotations - new JSON string of object containing annotations information
  * @throws {404} plasmid not found
@@ -250,4 +251,61 @@ router.put('/plasmid/annotations', (req, res) => {
     }
   });
 });
+
+
+
+
+/**
+ * Get all the prototypes that are matched within the current plasmid
+ * @name GET/api/plasmids/prototypes
+ * @return {[Prototype]|[]} - list of all the prototypes matched
+ */
+router.get('/prototypes', (req, res)=>{
+  const sanitizedPlasmidID = sanitizer.sanitize(req.session.plasmidID);
+  const sanitizedUser = sanitizer.sanitize(req.session.name);
+
+  Prototypes.findAllPrototypes().then((prototypesList)=>{
+    // no prototypes
+    if(prototypesList.length==0){
+      res.status(200).json({
+        message: 'Prototypes match response',
+        response: prototypesList,
+      }).end();
+    }
+    else{
+      Plasmids.findOnePlasmidByID(sanitizedPlasmidID, sanitizedUser).then((response)=>{
+        if(response.length==0){
+          res.status(404).json({
+            error: 'A plasmid with that ID:'+ req.session.plasmidID+ ' was not found!',
+          }).end();
+        }
+        else{
+          // TODO: figure out these wild cards??
+          // console.log("response", response);
+          let plasmidSequence = response[0].sequence;
+          console.log(plasmidSequence); 
+          let converter = {"N":"[AGCT]", "M":"M", "K": false, "Y":false, "B":false, "R":false, "S": false};
+          for(var index in prototypesList){
+            let prot = prototypesList[index];
+            let expr = "";
+            for(var i in prot.plainSequence){
+              let letter = prot.plainSequence[i];
+              // TODO more to be added here
+              expr+=letter;
+            }
+            // console.log("prot", prot);
+            let result = plasmidSequence.match(expr);
+            if(result){
+              console.log("there's a match!", result, prot, plasmidSequence.match(expr))
+            }
+          }
+
+
+        }
+      });
+    }
+
+  })
+});
+
 module.exports = router;
