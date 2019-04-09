@@ -280,10 +280,10 @@ router.get('/prototypes', (req, res)=>{
           }).end();
         }
         else{
+          let matched = [];
           // TODO: figure out these wild cards??
           // console.log("response", response);
           let plasmidSequence = response[0].sequence;
-          console.log(plasmidSequence); 
           let converter = {"N":"[AGCT]", "M":"M", "K": false, "Y":false, "B":false, "R":false, "S": false};
           for(var index in prototypesList){
             let prot = prototypesList[index];
@@ -296,11 +296,13 @@ router.get('/prototypes', (req, res)=>{
             // console.log("prot", prot);
             let result = plasmidSequence.match(expr);
             if(result){
-              console.log("there's a match!", result, prot, plasmidSequence.match(expr))
+              matched.push({name:prot.name, index:result.index, sequence:result[0]});
             }
           }
-
-
+          res.status(200).json({
+            message: 'Prototypes match response',
+            response: matched,
+          }).end();
         }
       });
     }

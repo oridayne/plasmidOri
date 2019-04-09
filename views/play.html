@@ -57,7 +57,7 @@
                         <trackmarker   markerclass="markerhover" markerstyle="fill:rgba(128,0,0,0.2)" ng-repeat='n in searchResults' ng-dblclick="clearSearch();" start='{{n.start}}' end='{{n.end}}' vadjust="25"  ng-click="viewSearch(n.start,n.end) "></trackmarker>
 
                         <!-- ORFS -->
-                        <trackmarker c ng-repeat='n in orfsdata' markerclass="orfhover"  ng-click="viewORF(n[0],n[1]); toggle('orf');"  start="{{n[0]}}" end="{{n[1]}}"  vadjust="-20" wadjust="-23" arrowstartlength="0.8" arrowstartwidth="10" arrowendlength="5" arrowendwidth="3"></trackmarker>
+                        <trackmarker ng-repeat='n in orfsdata' markerclass="orfhover"  ng-click="viewORF(n[0],n[1]); toggle('orf');"  start="{{n[0]}}" end="{{n[1]}}"  vadjust="-20" wadjust="-23" arrowstartlength="0.8" arrowstartwidth="10" arrowendlength="5" arrowendwidth="3"></trackmarker>
                         
                         <!-- blast matches -->
                         <trackmarker markerclass="blastmarker"  start="{{blastStart}}" end="{{blastEnd}}"  vadjust="-5" wadjust="-23"  ng-click="toggle('viewer');" ng-dblclick="resetBlast();deactivateAllHsp();"></trackmarker>
@@ -68,12 +68,13 @@
                         <!-- drawing arc backward -->
                         <trackmarker markerclass="markerhover"  ng-click="toggle('viewer')" ng-dblclick="reset()" ng-if="ed!=false && start>end" start="{{end}}" end="{{start}}"  vadjust="25" markerstyle="fill:rgba(0,128,0,0.2)" wadjust=""></trackmarker>
 
-                <!-- TaqI TODO later - restrinction enzymes--> 
-       <!--          <trackmarker start="30" end="50" markerstyle='stroke:#000;fill:steelblue;'>
-                    <markerlabel text="TaqI" vadjust="40" hadjust="2" valign="outer" class="lglabel blue" showline="1" linevadjust="-10" linevadjust="-15" lineclass="labelline"></markerlabel>
-                    <markerlabel type="path" text="920-150" class="smlabel white" vadjust="4"></markerlabel>
-                </trackmarker>
- -->
+                    <!-- TaqI TODO later - restrinction enzymes--> 
+                    <trackmarker  ng-repeat="enz in matchedEnzymes" start="{{enz.index}}" end="{{enz.index}}" markerstyle='stroke:#000;fill:steelblue;'>
+
+                        <markerlabel text="{{enz.name}}" wadjust="50" vadjust="50" hadjust="0" valign="outer" class="mdlabel darkblue enzLabel" showline="1" linevadjust="-10" linevadjust="-15" lineclass="labelline"></markerlabel>
+                        <!-- <markerlabel type="path" text="920-150" class="smlabel white" vadjust="4"></markerlabel> -->
+                    </trackmarker>
+
 
                     </plasmidtrack>
                 </plasmid>
@@ -216,8 +217,17 @@
                                        
                                 </div>
                             </div>
-                            <!-- <div ng-repeat="x in annotations">{{x}}</div> -->
 
+                            <!-- matched enzymes -->
+                            <br>
+                            <p class="blastStyle">Matched Enzymes</p>
+                            <input type="text" placeholder="Filter Enzymes" id="searchEnz" ng-keyup="" ng-model="searchEnz">
+                            <div  ng-repeat="enz in matchedEnzymes">
+                                <!-- {{enz}} -->
+                                <div class="annotationWrapper silverOutline" ng-show="enz.name.toUpperCase().indexOf(searchEnz.toUpperCase())>=0||enz.sequence.toUpperCase().indexOf(searchEnz.toUpperCase())>=0">
+                                    {{enz.name}}  {{enz.sequence}} 
+                                </div>
+                            </div>
                         </div>
                     </div>
 

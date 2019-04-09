@@ -107,9 +107,9 @@
 }
 
 .lglabel {font-size:14px}
-.mdlabel {font-size:10px}
+.mdlabel { font-size:10px}
 .smlabel {font-size:8px}
-.labelline {stroke:#333;stroke-dasharray:2,2;stroke-width:2px;}
+.labelline {stroke:#333;stroke-dasharray:2,2;stroke-width:1px;}
 .white {fill:#fff}
 .black {fill:#000}
 .red {fill:#c00}
