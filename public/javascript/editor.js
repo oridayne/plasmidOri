@@ -224,6 +224,7 @@ app.controller('myEditor',function($scope){
 
 	// save all current progress permanently
 	$scope.saveProgress = async function(){
+
 		document.getElementById("dnaWrapper").className = "saved";
 		document.getElementById("saveButton").className = "savedButton";
 		let scope = angular.element($("#divider")).scope();
@@ -241,12 +242,14 @@ app.controller('myEditor',function($scope){
 			newStr = editorScope.seq.substring(0,$scope.offsetStart)+$scope.textbuffer+editorScope.seq.substring($scope.offsetEnd);
 		}
 		// newStr = newStr.toUpperCase().replace(/-/g, '');
+
 		scope.seq = newStr;
 		$scope.offsetEnd = $scope.offsetStart+$scope.textbuffer.length;
 		scope.orfsFunc();
 		scope.updateAnnotations();
 		$scope.savePlasmidToDB();
-		$scope.sections = returnSections(newStr, $scope.buffer, $scope.bucket);
+		$scope.sections = returnSections($scope.textbuffer, $scope.buffer, $scope.bucket);
+		scope.end = $scope.offsetEnd;
 		//TODO: figure out how to not link this by index....
 	}
 

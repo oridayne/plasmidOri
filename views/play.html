@@ -48,7 +48,7 @@
                         <trackscale  id="innerticks" class='smajor' interval='{{interval}}' showlabels='1' labelclass='sml'></trackscale>
 
                         <!-- user annotations       -->
-                        <trackmarker  ng-repeat='n in annotations' class="highlight" ng-class="{'annHighlight': n.annotationSeq==annotationHighlight}"  start='{{n.start}}' end='{{n.end}}' ng-click="toggle('annotate'); setAnnotatePoints(n.start, n.end, n.name); focusAnnotation(n.start,n.end);"  >
+                        <trackmarker  ng-repeat='n in annotations' class="highlight" ng-class="{'annHighlight': n.annotationSeq==annotationHighlight}"  start='{{n.start}}' end='{{n.end}}' ng-click="toggle('annotate'); setAnnotatePoints(n.start, n.end, n.name); focusAnnotation(n.start,n.end);" >
                            <!--  <markerlabel ng-click="testing($event)" text="{{n.name}}" vadjust="40" hadjust="0" valign="outer" class="lglabel black labelhover" showline="1" linevadjust="-10" linevadjust="-15" lineclass="labelline"></markerlabel> -->
 
                         </trackmarker>
@@ -207,7 +207,7 @@
                         
                             <div>
                                 <p class="blastStyle">Annotations List</p>
-                                <div class="annotationWrapper silverOutline" ng-repeat="(gene, name) in annotationData" ng-click="highlightAllAnnotations(gene, name)" ng-dblclick="deHighlightAllAnnotations(name)" id="{{name}}">
+                                <div class="annotationWrapper silverOutline" ng-repeat="(gene, name) in annotationData" ng-click="highlightAllAnnotations(gene, name)" ng-dblclick="deHighlightAllAnnotations()" id="{{name}}">
                                         <div>{{name}} 
                                             <i ng-click="removeAllAnnotations(gene)" class="fas fa-times deleteAnn"></i>
                                             <!-- <i class="fas fa-chevron-down expandAnn"></i> -->

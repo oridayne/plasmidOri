@@ -29,12 +29,10 @@
         
         <div  ng-controller="borosCtrl"id="plasmidViewer" >
             <div id="plasmidWrapper">
-                <div class="plasmidItem" ng-repeat="n in plasmidList" id='n.uuid'>
-                    
-                    <!-- {{n.annotations}} -->
+                <div class="plasmidItem" ng-repeat="n in plasmidList" id='n.uuid'>                    
                     <plasmid  ng-click="focusPlasmid(n.uuid); selectPlasmid(n.uuid)" id={{n.uuid}} class="boros" sequencelength={{n.sequence.length}}>
                         <plasmidtrack class="track"  radius="50" width="10"  transform="translate(-75,-75)">
-                            <trackscale  id="innerticks" class='smajor' interval='10' showlabels='0' labelclass='sml'></trackscale>
+                            <trackscale  id="innerticks" class='smajor' interval='{{n.interval}}' showlabels='0' labelclass='sml'></trackscale>
                             <trackmarker  class="highlight" ng-repeat='x in n.annotations' start='{{x.start}}' end='{{x.end}}'>
                         </plasmidtrack>
                     </plasmid>

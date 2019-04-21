@@ -296,7 +296,7 @@ router.get('/prototypes', (req, res)=>{
             // console.log("prot", prot);
             let result = plasmidSequence.match(expr);
             if(result){
-              matched.push({name:prot.name, index:result.index, sequence:result[0]});
+              matched.push({name:prot.name, index:result.index, plainSequence:result[0], sequence:prot.sequence});
             }
           }
           res.status(200).json({

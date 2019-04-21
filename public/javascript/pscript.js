@@ -179,19 +179,20 @@ var app = angular.module('myApp', ['angularplasmid']);
         }
         $scope.highlightAllAnnotations = function(geneSeq, name){
           let anns = document.getElementsByClassName("annotationWrapper");
-          $scope.deHighlightAllAnnotations(name);
+          $scope.deHighlightAllAnnotations();
           $scope.annotationHighlight=geneSeq;
           document.getElementById(name).classList.remove("silverOutline")
           document.getElementById(name).classList.add("activeBlast");
         }
-        $scope.deHighlightAllAnnotations = function(name){
+        $scope.deHighlightAllAnnotations = function(){
           let anns = document.getElementsByClassName("annotationWrapper");
           console.log("anns", anns, anns.length);
           for(index=0; index<anns.length; index++){
             let elt = anns[index];
-            anns[index].classList.add("silverOutline")
             anns[index].classList.remove("activeBlast");
+            anns[index].classList.add("silverOutline")
           }       
+          $scope.annotationHighlight="";
         }
         // deletes sequence in the annotation, shifts others over
         $scope.deleteAnnotation = function(start, end){

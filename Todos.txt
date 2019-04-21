@@ -15,7 +15,7 @@ TODOS:
 - error handling for bad blast cases - job still pending, etc
 - lag issues when getting blast results
 - put back in controller for highligher
-
+- when saving, update highlight window
 
 blasting against database?
 plasmapper
