@@ -13,7 +13,7 @@ var nucConverter = {"A":"T", "T":"A", "G":"C", "C":"G", " ":" ", "a":"T", "t":"A
 
 app.controller('myEditor',function($scope){
 	$scope.DNA = angular.element($("#divider")).scope().seq;
-	$scope.text="AACTGTATGCGGAAAAGGAGGCCAGTGCATCAGA";
+	$scope.unsavedtext="AACTGTATGCGGAAAAGGAGGCCAGTGCATCAGA";
 	$scope.textbuffer = $scope.DNA;	
 
 	// dna base pairs per line
@@ -58,14 +58,30 @@ app.controller('myEditor',function($scope){
         saveAs(blob, plasmidName+".txt");
 	}
 
-	$scope.setEditor = function(start, end, text){
-		console.log("set editor called!");
+	$scope.setEditor = function(start, end){
+		console.log("set editor called!", start, end);
 		$scope.offsetStart = Math.min(start,end);
 		$scope.offsetEnd = Math.max(start,end);
-		$scope.textbuffer = text;
+		$scope.unsavedtext = $scope.textbuffer;
+        let text = $scope.textbuffer.substring(start,end);
+		if(start<0&&end<0){
+			start+=$scope.textbuffer.length;
+			end+=$scope.textbuffer.length;
+			text = $scope.textbuffer.substring(start,end);
+		}
+		if(start<0&&end>0){
+			text = $scope.textbuffer.substring(start+$scope.textbuffer.length)+$scope.textbuffer.substring(0, end);
+		}
 		console.log("return list called");
 		$scope.sections = returnSections(text, $scope.buffer, $scope.bucket);
 		console.log("after return list??")
+	}
+	$scope.showAllText = function(){
+		console.log("show all text called", $scope.textbuffer);
+		// $scope.textbuffer = $scope.unsavedtext;
+		$scope.offsetEnd = $scope.textbuffer.length;
+		$scope.offsetStart = 0;
+		$scope.sections = returnSections($scope.textbuffer, $scope.buffer, $scope.bucket);
 	}
 
 	$scope.toggleIndice = function(toggle){

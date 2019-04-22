@@ -48,7 +48,7 @@ var app = angular.module('myApp', ['angularplasmid']);
         $scope.minLength = 0;
         $scope.orfs = findAllORF($scope.seq, $scope.minLength);
 
-
+        $scope.awaitingMatch = false;
         $scope.matchedEnzymes = [];
         $scope.searchEnz = "";
         $scope.blastQuery = "";
@@ -68,16 +68,8 @@ var app = angular.module('myApp', ['angularplasmid']);
         // sets editor paramters here
         $scope.changeEditor = function(start,end){
           let editorScope = angular.element($("#editorModule")).scope();
-          let text = $scope.seq.substring(start,end);
-          if(start<0&&end<0){
-            start+=$scope.seq.length;
-            end+=$scope.seq.length;
-            text = $scope.seq.substring(start,end);
-          }
-          if(start<0&&end>0){
-            text = $scope.seq.substring(start+$scope.seq.length)+$scope.seq.substring(0, end);
-          }
-          editorScope.setEditor(start,end,text);
+
+          editorScope.setEditor(start,end);
         }
 
         // annotate plasmid
@@ -118,7 +110,9 @@ var app = angular.module('myApp', ['angularplasmid']);
           $scope.start = 0;
           $scope.end = 0; 
           $scope.toggle("dna"); 
-          $scope.changeEditor(0,$scope.seq.length);
+          // $scope.changeEditor(0,$scope.seq.length);
+          let editorScope = angular.element($("#editorModule")).scope();
+          editorScope.showAllText();
         };
         // changes editor according to annotation
         $scope.focusAnnotation = function(start,end){
@@ -292,12 +286,22 @@ var app = angular.module('myApp', ['angularplasmid']);
             $scope.matchedEnzymes = $scope.matchedEnzymes.sort(function(a,b){
               return a.index-b.index;
             });
-
           }
           // sort by alphabetical position
           else{
             $scope.matchedEnzymes = $scope.matchedEnzymes.sort(compareEnzymes);
           }
+        }
+        // TODO: switch this to local storage in future....
+        $scope.generateEnzymes = async function(){
+          console.log('generating enzymes called');
+          let text = angular.element($("#editorModule")).scope().textbuffer;
+          let matched = await generateEnzymes(text);
+          console.log("finished gen");
+          $scope.$apply(function(){
+            $scope.matchedEnzymes = matched;
+
+          })
         }
         $scope.selectAllEnz = function(){
           for(index=0;index<$scope.matchedEnzymes.length;index++){
@@ -311,9 +315,6 @@ var app = angular.module('myApp', ['angularplasmid']);
         }
         $scope.peekEnzyme = function(index){
           $scope.matchedEnzymes[index].peek=true;
-          if(!($scope.matchedEnzymes[index].show)){
-
-          }
         }
         // only deselect if it wasn't deselected before
         $scope.unpeekEnzyme = function(index){
@@ -356,7 +357,8 @@ async function getSpecificPlasmid(plasmidID){
 
     // remake the editor
     // TODO: clear all the blast?
-    scope.changeEditor(0, sequence.length);
+    let editorScope = angular.element($("#editorModule")).scope();
+    editorScope.showAllText();
   }
   else{
     // TODO: error response?
@@ -394,6 +396,11 @@ async function loadInPlasmid(plasmidID){
     });
     // remake the editor
     // TODO: clear all the blast?
+      let editorScope = angular.element($("#editorModule")).scope();
+      editorScope.$apply(function(){
+        editorScope.textbuffer = sequence;
+        editorScope.showAllText();
+      })
     // scope.changeEditor(0, sequence.length);
   }
   else{
@@ -451,7 +458,9 @@ function toggle(newSelected){
   deactivateTitle();
   if(newSelected=="dna"){
     document.getElementById("dna").classList.add("active");
-    scope.changeEditor(0,scope.seq.length);
+    let editorScope = angular.element($("#editorModule")).scope();
+    editorScope.showAllText();
+    // scope.changeEditor(0,scope.seq.length);
   }
   if(newSelected=="viewer"||newSelected=="annotate"){
     document.getElementById("viewer").classList.add("active");
@@ -804,5 +813,35 @@ async function setMatchedEnzymes(){
   console.log("matched", matchedProto);
 }
 
+async function generateEnzymes(sequence){
+  let prots =await getAllPrototypes();
+  let protsList = [];
+  if(!(prots.response)){
+    return [];
+  }
+  protsList = prots.response;
+  let matched = [];
+  let converter = {"N":"[AGCT]", "M":"M", "K": false, "Y":false, "B":false, "R":false, "S": false};
+  for(var index in protsList){
+    let enz = protsList[index];
+    let expr="";
+    for(var i in enz.plainSequence){
+      let letter = enz.plainSequence[i];
+      // TODO: more needed here
+      expr+=letter;
+    }
 
+    let tempSequence = sequence;
+    let result = tempSequence.match(expr)
+    while(result){
+      matched.push({name:enz.name, index:result.index, plainSequence:result[0], sequence:enz.sequence});
+      // DENG: uh....not quite.... 
+      // TODO: double check this for when we add in lazy matching!
+      tempSequence = tempSequence.substring(result.index+result[0].length);
+      result = tempSequence.match(expr);
+    }
+  }
+  return matched;
+
+}
 

@@ -231,9 +231,11 @@
                             <label class="container">Index
                               <input type="radio" name="enz" ng-click="sortMatchedEnz('index')">
                             </label>
-
+                            <button ng-click="generateEnzymes()">Generate Enzymes</button>
                             <input type="text" placeholder="Filter Enzymes" id="searchEnz" ng-keyup="" ng-model="searchEnz">
-                            <div  ng-repeat="enz in matchedEnzymes track by $index">
+                            <div ng-show="awaitingMatch">Generating Enzymes...</div>
+                            
+                            <div ng-show="awaitingMatch==false"  ng-repeat="enz in matchedEnzymes track by $index">
                                 <div class="annotationWrapper silverOutline"  
                                 ng-class="{'selectedOutline': enz.show==true, 'silverOutline':!(enz.show)}" 
                                 ng-show="enz.name.toUpperCase().indexOf(searchEnz.toUpperCase())>=0||enz.sequence.toUpperCase().indexOf(searchEnz.toUpperCase())>=0"

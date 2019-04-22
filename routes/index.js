@@ -17,7 +17,7 @@ router.get('/', (req, res) => {
   res.render('play', { title: 'plasmid'});
 });
 
-/* GET home page. */
+/* GET boros page. */
 router.get('/boros', (req, res) => {
   res.render('boros', { title: 'Ouroboros'});
 });
@@ -26,5 +26,11 @@ router.get('/boros', (req, res) => {
 router.get('/edit', (req, res) => {
   res.render('index', { title: 'plasmid'});
 });
+
+/* GET clone page. */
+router.get('/clone', (req, res) => {
+  res.render('clone', { title: 'Clone'});
+});
+
 
 module.exports = router;
