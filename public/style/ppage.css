@@ -294,3 +294,10 @@
 	stroke-width:2px;
 	stroke:green;
 }
+
+
+.selectedOutline{
+	outline: 2px solid green;
+}
+
+

@@ -126,6 +126,7 @@ class Database {
                    minLength, INT,
                    annotations TEXT NOT NULL,
                    annotationData TEXT NOT NULL, 
+                   // matchedEnz TEXT NOT NULL, 
                    PRIMARY KEY (uuid),
                    FOREIGN KEY (username) REFERENCES users (username) 
                    ON DELETE CASCADE ON UPDATE NO ACTION

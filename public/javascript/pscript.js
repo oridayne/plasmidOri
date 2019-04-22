@@ -287,6 +287,44 @@ var app = angular.module('myApp', ['angularplasmid']);
           $scope.testToggle=index;
         };
 
+        $scope.sortMatchedEnz = function(key){
+          if(key=="index"){
+            $scope.matchedEnzymes = $scope.matchedEnzymes.sort(function(a,b){
+              return a.index-b.index;
+            });
+
+          }
+          // sort by alphabetical position
+          else{
+            $scope.matchedEnzymes = $scope.matchedEnzymes.sort(compareEnzymes);
+          }
+        }
+        $scope.selectAllEnz = function(){
+          for(index=0;index<$scope.matchedEnzymes.length;index++){
+            $scope.matchedEnzymes[index].show=true;
+          }
+        }
+        $scope.deselectAllEnz = function(){
+          for(index=0;index<$scope.matchedEnzymes.length;index++){
+            $scope.matchedEnzymes[index].show=false;
+          }
+        }
+        $scope.peekEnzyme = function(index){
+          $scope.matchedEnzymes[index].peek=true;
+          if(!($scope.matchedEnzymes[index].show)){
+
+          }
+        }
+        // only deselect if it wasn't deselected before
+        $scope.unpeekEnzyme = function(index){
+          $scope.matchedEnzymes[index].peek=false;
+        }
+        $scope.toggleEnzyme = function(index){
+          if(!($scope.matchedEnzymes[index].hasOwnProperty('show'))){
+            $scope.matchedEnzymes[index].show=false;
+          }
+          $scope.matchedEnzymes[index].show = !($scope.matchedEnzymes[index].show);
+        }
     });
 
 
@@ -351,6 +389,7 @@ async function loadInPlasmid(plasmidID){
       scope.toggle('dna');
       if(matchedProto.response){
         scope.matchedEnzymes = matchedProto.response.sort(compareEnzymes);
+        // scope.deselectAllEnz();
       }
     });
     // remake the editor
@@ -748,11 +787,12 @@ function compareAnnotations(ann1, ann2) {
 * sorts by enzyme name
 */
 function compareEnzymes(enz1, enz2) {
-
-  if (enz1.name<enz2.name) {
+  let name1 = enz1.name.toUpperCase();
+  let name2 = enz2.name.toUpperCase();
+  if (name1<name2) {
     return -1;
   }
-  if (enz1.name>enz2.name) {
+  if (name1>name2) {
     return 1;
   }
   // a must be equal to b
