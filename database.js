@@ -106,6 +106,7 @@ class Database {
       sequence TEXT NOT NULL,
       plainSequence TEXT NOT NULL,
       type INT NOT NULL,
+      disable BIT NOT NULL, 
       PRIMARY KEY (name))`
 
       const response = await database.query(sql);

@@ -106,6 +106,10 @@
 	fill: red;
 }
 
+.focusEnz{
+	 z-index: -1;
+}
+
 .lglabel {font-size:14px}
 .mdlabel { font-size:10px}
 .smlabel {font-size:8px}

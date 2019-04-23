@@ -300,4 +300,11 @@
 	outline: 2px solid green;
 }
 
+#enzymeWrapper{
+	margin-top:10px;
+	outline: 1px solid silver;
+	height: 400px;
+	padding:5px;
+	overflow: auto;
+}
 

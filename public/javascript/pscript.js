@@ -48,6 +48,7 @@ var app = angular.module('myApp', ['angularplasmid']);
         $scope.minLength = 0;
         $scope.orfs = findAllORF($scope.seq, $scope.minLength);
 
+
         $scope.awaitingMatch = false;
         $scope.matchedEnzymes = [];
         $scope.searchEnz = "";
@@ -326,6 +327,12 @@ var app = angular.module('myApp', ['angularplasmid']);
           }
           $scope.matchedEnzymes[index].show = !($scope.matchedEnzymes[index].show);
         }
+        $scope.enzymeHighlight = function(index, event){
+
+        }
+        $scope.enzymeDehighlight = function(index){
+          
+        }
     });
 
 
@@ -390,7 +397,7 @@ async function loadInPlasmid(plasmidID){
       scope.orfsdata=findAllORF(sequence, minLength);
       scope.toggle('dna');
       if(matchedProto.response){
-        scope.matchedEnzymes = matchedProto.response.sort(compareEnzymes);
+        // scope.matchedEnzymes = matchedProto.response.sort(compareEnzymes);
         // scope.deselectAllEnz();
       }
     });
@@ -813,6 +820,19 @@ async function setMatchedEnzymes(){
   console.log("matched", matchedProto);
 }
 
+function assignEnzymes(enzymeList){
+  enzymeList = enzymeList.sort(function(a,b){
+    return a.index-b.index;
+  });
+  let heights = [20,40,60,80]
+  // let heights = [50,50,50,50]
+  for(var index in enzymeList){
+    enzymeList[index].height = heights[index%4];
+  }
+  console.log("enzymeList", enzymeList);
+  return enzymeList;
+}
+
 async function generateEnzymes(sequence){
   let prots =await getAllPrototypes();
   let protsList = [];
@@ -823,7 +843,12 @@ async function generateEnzymes(sequence){
   let matched = [];
   let converter = {"N":"[AGCT]", "M":"M", "K": false, "Y":false, "B":false, "R":false, "S": false};
   for(var index in protsList){
+
     let enz = protsList[index];
+    if(enz.plainSequence.length<6){
+      continue;
+    }
+    // let enz = {name:"AatII", plainSequence: "GACGTC", sequence:"GACGTC"};
     let expr="";
     for(var i in enz.plainSequence){
       let letter = enz.plainSequence[i];
@@ -832,16 +857,22 @@ async function generateEnzymes(sequence){
     }
 
     let tempSequence = sequence;
+    let storedIndex = 0;
     let result = tempSequence.match(expr)
     while(result){
-      matched.push({name:enz.name, index:result.index, plainSequence:result[0], sequence:enz.sequence});
+      // TODO: get enzyme matching working for....circular shit....
+      storedIndex+=result.index;
+      matched.push({name:enz.name, index:storedIndex, plainSequence:result[0], sequence:enz.sequence, height:50});
       // DENG: uh....not quite.... 
       // TODO: double check this for when we add in lazy matching!
-      tempSequence = tempSequence.substring(result.index+result[0].length);
+      tempSequence = tempSequence.substring(result.index+1);
       result = tempSequence.match(expr);
+      // result = false;
     }
+    // break;
   }
-  return matched;
+  return assignEnzymes(matched);
+  // return matched;
 
 }
 

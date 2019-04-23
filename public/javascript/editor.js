@@ -244,18 +244,17 @@ app.controller('myEditor',function($scope){
 		document.getElementById("dnaWrapper").className = "saved";
 		document.getElementById("saveButton").className = "savedButton";
 		let scope = angular.element($("#divider")).scope();
-		let editorScope = angular.element($("#editorModule")).scope();
 		let diff = $scope.textbuffer.length-($scope.offsetEnd-$scope.offsetStart);
 		let newEnd = $scope.offsetEnd + diff;
 		let newStr = "";
 		if($scope.offsetStart<0){
 			let start = $scope.textbuffer.substring(Math.abs($scope.offsetStart));
-			let mid = editorScope.seq.substring($scope.offsetEnd, $scope.offsetStart+editorScope.seq.length);
+			let mid = scope.seq.substring($scope.offsetEnd, $scope.offsetStart+scope.seq.length);
 			let end = $scope.textbuffer.substring(0, Math.abs($scope.offsetStart));
 			newStr = start+mid+end;
 		}
 		else{
-			newStr = editorScope.seq.substring(0,$scope.offsetStart)+$scope.textbuffer+editorScope.seq.substring($scope.offsetEnd);
+			newStr = scope.seq.substring(0,$scope.offsetStart)+$scope.textbuffer+scope.seq.substring($scope.offsetEnd);
 		}
 		// newStr = newStr.toUpperCase().replace(/-/g, '');
 
@@ -271,7 +270,9 @@ app.controller('myEditor',function($scope){
 
 	// save a row to the temporary buffer
 	$scope.saveToBuffer = function(index, row){
-		console.log("save to buffer called!", index, row);
+		let scope = angular.element($("#divider")).scope();
+		scope.matchedEnzymes = [];
+		console.log("save to buffer called ?!", index, row);
 		let rowSize = $scope.buffer;
 		let elt=false;
 		let newVal = "";
@@ -298,6 +299,7 @@ app.controller('myEditor',function($scope){
 		}
 	},
 	$scope.editRow=function(index, event){
+
 		console.log("cursor? ", event.target.selectionStart)
 		$scope.editing = 0;
 		let elt = document.getElementById(index);

@@ -16,6 +16,9 @@ TODOS:
 - lag issues when getting blast results
 - put back in controller for highligher
 - get reverse complement working
+- GET ENZYME MATCH TO WORK OVER THE CIRCULAR PROBLEM!
+- allow user to disable or enable enzyme matching
+- filter by enzyme type, length
 
 blasting against database?
 plasmapper

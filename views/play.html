@@ -69,9 +69,8 @@
                         <trackmarker markerclass="markerhover"  ng-click="toggle('viewer')" ng-dblclick="reset()" ng-if="ed!=false && start>end" start="{{end}}" end="{{start}}"  vadjust="25" markerstyle="fill:rgba(0,128,0,0.2)" wadjust=""></trackmarker>
 
                     <!-- TaqI TODO later - restrinction enzymes--> 
-                    <trackmarker  ng-repeat="enz in matchedEnzymes" start="{{enz.index}}" end="{{enz.index}}" markerstyle='stroke:#000;fill:steelblue;' ng-show="enz.show==true||enz.peek==true">
-
-                        <markerlabel text="{{enz.name}}" wadjust="50" vadjust="50" hadjust="0" valign="outer" class="mdlabel darkblue enzLabel" showline="1" linevadjust="-10" linevadjust="-15" lineclass="labelline"></markerlabel>
+                    <trackmarker ng-repeat="enz in matchedEnzymes track by $index"  start="{{enz.index}}" end="{{enz.index}}" markerstyle='stroke:#000;fill:steelblue;' ng-show="enz.show==true||enz.peek==true" ng-mouseover=" peekEnzyme($index); enzymeHighlight($index, $event)"  ng-mouseleave="unpeekEnzyme($index);enzymeDehighlight($index)">
+                        <markerlabel text="{{enz.name}}" wadjust="50" vadjust="{{enz.height}}" hadjust="0" valign="outer" class="darkblue enzLabel" ng-class="{'mdlabel':!(enz.peek), 'red':enz.peek==true, 'lglabel':enz.peek==true, 'focusEnz':enz.peek==true}" showline="1" linevadjust="-10" linevadjust="-15" lineclass="labelline" ng-dblclick="toggleEnzyme($index)"></markerlabel>
                         <!-- <markerlabel type="path" text="920-150" class="smlabel white" vadjust="4"></markerlabel> -->
                     </trackmarker>
 
@@ -226,23 +225,25 @@
                             <button id="hideEnz" ng-click="deselectAllEnz()">Deselect All Enzymes</button>
 
                             <label class="container">Alphabetical
-                            <input type="radio" checked="checked"  name="enz" ng-click="sortMatchedEnz('alphabetical')">
+                            <input type="radio"   name="enz" ng-click="sortMatchedEnz('alphabetical')">
                             </label>
                             <label class="container">Index
-                              <input type="radio" name="enz" ng-click="sortMatchedEnz('index')">
+                              <input type="radio" checked="checked" name="enz" ng-click="sortMatchedEnz('index')">
                             </label>
                             <button ng-click="generateEnzymes()">Generate Enzymes</button>
                             <input type="text" placeholder="Filter Enzymes" id="searchEnz" ng-keyup="" ng-model="searchEnz">
                             <div ng-show="awaitingMatch">Generating Enzymes...</div>
                             
-                            <div ng-show="awaitingMatch==false"  ng-repeat="enz in matchedEnzymes track by $index">
-                                <div class="annotationWrapper silverOutline"  
-                                ng-class="{'selectedOutline': enz.show==true, 'silverOutline':!(enz.show)}" 
-                                ng-show="enz.name.toUpperCase().indexOf(searchEnz.toUpperCase())>=0||enz.sequence.toUpperCase().indexOf(searchEnz.toUpperCase())>=0"
-                                ng-mouseover="peekEnzyme($index)" 
-                                ng-mouseleave="unpeekEnzyme($index, enz.show)"
-                                ng-click="toggleEnzyme($index)">
-                                    {{enz.name}}  {{enz.sequence}} {{enz.index}}
+                            <div id="enzymeWrapper">
+                                <div ng-show="awaitingMatch==false"  ng-repeat="enz in matchedEnzymes track by $index">
+                                    <div class="annotationWrapper silverOutline"  
+                                    ng-class="{'selectedOutline': enz.show==true, 'silverOutline':!(enz.show)}" 
+                                    ng-show="enz.name.toUpperCase().indexOf(searchEnz.toUpperCase())>=0||enz.sequence.toUpperCase().indexOf(searchEnz.toUpperCase())>=0"
+                                    ng-mouseover="peekEnzyme($index)" 
+                                    ng-mouseleave="unpeekEnzyme($index, enz.show)"
+                                    ng-click="toggleEnzyme($index)">
+                                        {{enz.name}}  {{enz.sequence}} {{enz.index}} {{enz.height}}
+                                    </div>
                                 </div>
                             </div>
                         </div>
